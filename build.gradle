@@ -58,9 +58,9 @@ tasks.named('test') {
 tasks.register('copyDocs') {
     dependsOn(':openapi3')
     doLast {
-        delete 'src/main/resources/static/docs/'
+        delete 'src/main/resources/static/docs/steady-api.json'
         copy {
-            from "build/resources/main/static/docs"
+            from "build/resources/main/static/docs/steady-api.json"
             into "src/main/resources/static/docs/"
         }
     }
