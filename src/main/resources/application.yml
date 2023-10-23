@@ -1,1 +1,4 @@
 
+springdoc:
+  swagger-ui:
+    url: /docs/steady-api.json
