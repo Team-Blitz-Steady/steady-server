@@ -63,7 +63,7 @@ tasks.register('copyDocs') {
             from "build/resources/main/static/docs"
             into "src/main/resources/static/docs/"
         }
-    }2
+    }
 }
 
 bootJar{
