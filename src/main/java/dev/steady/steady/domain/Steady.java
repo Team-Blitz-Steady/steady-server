@@ -34,7 +34,7 @@ public class Steady extends BaseEntity {
     private SteadyStatus status;
 
     @Column(name = "recruit_count", nullable = false)
-    private int recruit_count;
+    private int recruitCount;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "steady_mode", nullable = false)
@@ -65,7 +65,7 @@ public class Steady extends BaseEntity {
     private Steady(String name,
                    SteadyType type,
                    SteadyStatus status,
-                   int recruit_count,
+                   int recruitCount,
                    SteadyMode steadyMode,
                    LocalDate openingDate,
                    LocalDate deadline,
@@ -76,7 +76,7 @@ public class Steady extends BaseEntity {
         this.name = name;
         this.type = type;
         this.status = status;
-        this.recruit_count = recruit_count;
+        this.recruitCount = recruitCount;
         this.steadyMode = steadyMode;
         this.openingDate = openingDate;
         this.deadline = deadline;

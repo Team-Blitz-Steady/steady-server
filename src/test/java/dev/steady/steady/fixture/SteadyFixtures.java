@@ -16,13 +16,13 @@ public class SteadyFixtures {
         return SteadyCreateRequest.builder()
                 .name("테스트 스테디")
                 .type(SteadyType.STUDY)
-                .recruit_count(6)
+                .recruitCount(6)
                 .steadyMode(SteadyMode.ONLINE)
-                .estimate(LocalDate.now().plusDays(7))
+                .openingDate(LocalDate.now().plusDays(7))
                 .deadline(LocalDate.now().plusDays(14))
                 .title("스테디원 모집합니다")
                 .content("많관부")
-                .formId(1L)
+                .steadyFormId(1L)
                 .build();
     }
 

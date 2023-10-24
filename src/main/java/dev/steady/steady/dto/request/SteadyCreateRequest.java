@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public record SteadyCreateRequest(
         String name,
         SteadyType type,
-        int recruit_count,
+        int recruitCount,
         SteadyMode steadyMode,
         LocalDate openingDate,
         LocalDate deadline,
@@ -24,7 +24,7 @@ public record SteadyCreateRequest(
                 .name(name)
                 .type(type)
                 .status(SteadyStatus.RECRUITING)
-                .recruit_count(recruit_count)
+                .recruitCount(recruitCount)
                 .steadyMode(steadyMode)
                 .openingDate(openingDate)
                 .deadline(deadline)

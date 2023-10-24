@@ -4,7 +4,7 @@ import dev.steady.steadyForm.domain.SteadyForm;
 import dev.steady.user.domain.User;
 import org.springframework.test.util.ReflectionTestUtils;
 
-public class FormFixtures {
+public class SteadyFormFixtures {
 
     public static SteadyForm createForm(User user) {
         SteadyForm steadyForm = SteadyForm.builder()
