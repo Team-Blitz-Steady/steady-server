@@ -1,3 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:h2:~/blitz
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    open-in-view: true
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+    show_sql: true
+
+
+
 springdoc:
   swagger-ui:
     url: steady-api.json
