@@ -1,6 +1,6 @@
 package dev.steady.steady.domain;
 
-import dev.steady.form.domain.Form;
+import dev.steady.steadyForm.domain.SteadyForm;
 import dev.steady.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -8,7 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -39,8 +40,11 @@ public class Steady extends BaseEntity {
     @Column(name = "steady_mode", nullable = false)
     private SteadyMode steadyMode;
 
-    @Column(name = "estimate", nullable = false)
-    private LocalDateTime estimate;
+    @Column(name = "opening_date", nullable = false)
+    private LocalDate openingDate;
+
+    @Column(name = "deadline", nullable = false)
+    private LocalDate deadline;
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -48,17 +52,14 @@ public class Steady extends BaseEntity {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @Column(name = "deadline", nullable = false)
-    private LocalDateTime deadline;
-
     @Embedded
     private Promotion promotion;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Form formId;
+    private SteadyForm steadyForm;
 
     @OneToMany(mappedBy = "steady", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Participant> participants;
+    private List<Participant> participants = new ArrayList<>();
 
     @Builder
     private Steady(String name,
@@ -66,24 +67,27 @@ public class Steady extends BaseEntity {
                    SteadyStatus status,
                    int recruit_count,
                    SteadyMode steadyMode,
-                   LocalDateTime estimate,
+                   LocalDate openingDate,
+                   LocalDate deadline,
                    String title,
                    String content,
-                   LocalDateTime deadline,
                    Promotion promotion,
-                   Form formId,
-                   List<Participant> participants) {
+                   SteadyForm steadyForm) {
         this.name = name;
         this.type = type;
         this.status = status;
         this.recruit_count = recruit_count;
         this.steadyMode = steadyMode;
-        this.estimate = estimate;
+        this.openingDate = openingDate;
+        this.deadline = deadline;
         this.title = title;
         this.content = content;
-        this.deadline = deadline;
         this.promotion = promotion;
-        this.formId = formId;
-        this.participants = participants;
+        this.steadyForm = steadyForm;
     }
+
+    public void addParticipant(Participant participant) {
+        participants.add(participant);
+    }
+
 }
