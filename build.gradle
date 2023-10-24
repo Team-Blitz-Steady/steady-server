@@ -51,8 +51,16 @@ dependencies {
 }
 
 tasks.named('test') {
-    outputs.dir snippetsDir
     useJUnitPlatform()
+}
+
+openapi3 {
+    server = 'http://localhost:80'
+    title = 'Steady Server API'
+    description = '스테디 서버 API'
+    version = "${project.version}"
+    outputFileNamePrefix = 'steady-api'
+    outputDirectory = 'build/resources/main/static/docs'
 }
 
 tasks.register('copyDocs') {
@@ -68,18 +76,4 @@ tasks.register('copyDocs') {
 
 bootJar{
     dependsOn(':copyDocs')
-}
-
-openapi3 {
-    server = 'http://localhost:80'
-    title = 'Steady Server API'
-    description = '스테디 서버 API'
-    version = "${project.version}"
-    outputFileNamePrefix = 'steady-api'
-    outputDirectory = 'build/resources/main/static/docs'
-}
-
-tasks.named('asciidoctor') {
-    inputs.dir snippetsDir
-    dependsOn test
 }
