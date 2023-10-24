@@ -3,6 +3,7 @@ package dev.steady.steady.domain;
 import dev.steady.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,8 +22,14 @@ public class Participant {
     @ManyToOne(fetch = FetchType.LAZY)
     private Steady steady;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "participant_role", nullable = false)
-    private ParticipantRole participantRole;
+    @Column(name = "is_leader", nullable = false)
+    private boolean isLeader;
+
+    @Builder
+    private Participant(User user, Steady steady, boolean isLeader) {
+        this.user = user;
+        this.steady = steady;
+        this.isLeader = isLeader;
+    }
 
 }

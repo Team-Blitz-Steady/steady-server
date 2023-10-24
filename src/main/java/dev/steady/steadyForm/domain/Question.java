@@ -1,4 +1,4 @@
-package dev.steady.form.domain;
+package dev.steady.steadyForm.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -17,11 +17,11 @@ public class Question {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Form form;
+    private SteadyForm steadyForm;
 
     @Builder
-    private Question(Form form) {
-        this.form = form;
+    private Question(SteadyForm steadyForm) {
+        this.steadyForm = steadyForm;
     }
 
 }

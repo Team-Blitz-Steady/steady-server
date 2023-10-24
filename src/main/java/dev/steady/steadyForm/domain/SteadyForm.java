@@ -1,4 +1,4 @@
-package dev.steady.form.domain;
+package dev.steady.steadyForm.domain;
 
 import dev.steady.user.domain.User;
 import jakarta.persistence.*;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "forms")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Form {
+public class SteadyForm {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +24,7 @@ public class Form {
     private User user;
 
     @Builder
-    private Form(String name, User user) {
+    private SteadyForm(String name, User user) {
         this.name = name;
         this.user = user;
     }

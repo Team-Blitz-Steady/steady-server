@@ -1,7 +1,7 @@
 package dev.steady.applicationForm.domain;
 
 
-import dev.steady.form.domain.Question;
+import dev.steady.steadyForm.domain.Question;
 import dev.steady.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
