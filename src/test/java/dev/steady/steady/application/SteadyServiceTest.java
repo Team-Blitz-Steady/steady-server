@@ -1,7 +1,7 @@
 package dev.steady.steady.application;
 
 import dev.steady.steadyForm.domain.SteadyForm;
-import dev.steady.steadyForm.fixture.FormFixtures;
+import dev.steady.steadyForm.fixture.SteadyFormFixtures;
 import dev.steady.steadyForm.infrastructure.SteadyFormRepository;
 import dev.steady.global.auth.AuthContext;
 import dev.steady.steady.domain.Promotion;
@@ -32,16 +32,16 @@ class SteadyServiceTest {
     private SteadyService steadyService;
 
     @Mock
-    SteadyRepository steadyRepository;
+    private SteadyRepository steadyRepository;
 
     @Mock
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Mock
-    SteadyFormRepository steadyFormRepository;
+    private SteadyFormRepository steadyFormRepository;
 
     @Mock
-    AuthContext authContext;
+    private AuthContext authContext;
 
     @Test
     @DisplayName("스터디 생성 요청을 통해 스터디를 생성할 수 있다")
@@ -49,7 +49,7 @@ class SteadyServiceTest {
         // given
         User user = UserFixtures.createUser();
         SteadyCreateRequest steadyRequest = SteadyFixtures.createSteadyRequest();
-        SteadyForm steadyForm = FormFixtures.createForm(user);
+        SteadyForm steadyForm = SteadyFormFixtures.createForm(user);
         Promotion promotion = SteadyFixtures.createPromotion();
         Steady steady = SteadyFixtures.createSteady(steadyRequest, promotion, steadyForm);
 

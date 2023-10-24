@@ -1,4 +1,4 @@
-package dev.steady.user.api;
+package dev.steady.steady.api;
 
 import dev.steady.steady.application.SteadyService;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
