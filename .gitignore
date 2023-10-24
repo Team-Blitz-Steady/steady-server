@@ -37,4 +37,4 @@ out/
 .vscode/
 
 ### api docs ###
-/src/main/resources/static/docs/steady-api.json
+/src/main/resources/static/steady-api.json
