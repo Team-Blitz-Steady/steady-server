@@ -1,7 +1,6 @@
 package dev.steady.steady.api;
 
 import com.epages.restdocs.apispec.Schema;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.steady.steady.application.SteadyService;
 import dev.steady.steady.domain.Promotion;

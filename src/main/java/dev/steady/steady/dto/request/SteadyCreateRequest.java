@@ -1,7 +1,7 @@
 package dev.steady.steady.dto.request;
 
-import dev.steady.steadyForm.domain.SteadyForm;
 import dev.steady.steady.domain.*;
+import dev.steady.steadyForm.domain.SteadyForm;
 import lombok.Builder;
 
 import java.time.LocalDate;

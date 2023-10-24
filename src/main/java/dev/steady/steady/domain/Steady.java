@@ -1,7 +1,7 @@
 package dev.steady.steady.domain;
 
-import dev.steady.steadyForm.domain.SteadyForm;
 import dev.steady.global.entity.BaseEntity;
+import dev.steady.steadyForm.domain.SteadyForm;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
