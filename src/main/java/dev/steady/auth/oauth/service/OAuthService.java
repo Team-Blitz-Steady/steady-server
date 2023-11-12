@@ -33,7 +33,7 @@ public class OAuthService {
             return LogInResponse.forUserNotExist(accountId);
         }
 
-        Account account = accountRepository.findByPlatformAndPlatformId(userInfo.getPlatform(), userInfo.getPlatformId());
+        Account account = accountRepository.getByPlatformAndPlatformId(userInfo.getPlatform(), userInfo.getPlatformId());
 
         if (account.hasNoUser()) {
             return LogInResponse.forUserNotExist(account.getId());

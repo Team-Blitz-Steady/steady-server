@@ -16,6 +16,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     boolean existsByPlatformAndPlatformId(Platform platform, String platformId);
 
-    Account findByPlatformAndPlatformId(Platform platform, String platformId);
+    Account getByPlatformAndPlatformId(Platform platform, String platformId);
 
 }
