@@ -1,7 +1,5 @@
 package dev.steady.global.auth;
 
-import dev.steady.global.exception.AuthenticationException;
-import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -10,14 +8,11 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static dev.steady.user.exception.UserErrorCode.USER_NOT_FOUND;
-
 @Component
 @RequiredArgsConstructor
 public class AuthorizedArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthContext authContext;
-    private final UserRepository userRepository;
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -30,11 +25,6 @@ public class AuthorizedArgumentResolver implements HandlerMethodArgumentResolver
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
         UserInfo userInfo = UserInfo.from(authContext);
-
-        if (userInfo.isAuthenticated() &&
-            !userRepository.existsById(userInfo.userId())) {
-            throw new AuthenticationException(USER_NOT_FOUND);
-        }
 
         return userInfo;
     }
