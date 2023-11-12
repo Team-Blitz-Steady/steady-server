@@ -1,5 +1,6 @@
 package dev.steady.user.service;
 
+import dev.steady.global.auth.UserInfo;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -9,6 +10,7 @@ import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import dev.steady.user.domain.repository.UserStackRepository;
 import dev.steady.user.dto.request.UserCreateRequest;
+import dev.steady.user.dto.response.UserDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,14 @@ public class UserService {
     private final StackRepository stackRepository;
     private final PositionRepository positionRepository;
     private final UserStackRepository userStackRepository;
+
+    @Transactional(readOnly = true)
+    public UserDetailResponse getMyUserDetail(UserInfo userInfo) {
+        User user = userRepository.getUserBy(userInfo.userId());
+        List<UserStack> userStacks = userStackRepository.findAllByUserId(userInfo.userId());
+
+        return UserDetailResponse.from(user, userStacks);
+    }
 
     @Transactional
     public Long createUser(UserCreateRequest request) {
