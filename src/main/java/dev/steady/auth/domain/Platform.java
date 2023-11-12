@@ -1,16 +1,19 @@
 package dev.steady.auth.domain;
 
-import java.util.Arrays;
+import dev.steady.auth.exception.OAuthPlatformException;
+
+import static dev.steady.auth.exception.AuthErrorCode.NOT_SUPPORTED_PLATFORM;
 
 public enum Platform {
 
     KAKAO;
 
     public static Platform from(String platformName) {
-        return Arrays.stream(Platform.values())
-                .filter(v -> v.name().equals(platformName.toUpperCase()))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("일치하는 플랫폼이 없습니다: %s", platformName)));
+        try {
+            return Platform.valueOf(platformName.toUpperCase());
+        } catch (IllegalArgumentException exception) {
+            throw new OAuthPlatformException(NOT_SUPPORTED_PLATFORM);
+        }
     }
 
 }
