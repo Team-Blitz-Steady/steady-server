@@ -18,10 +18,8 @@ public class AccountService {
 
     @Transactional
     public Platform registerUser(Long accountId, Long userId) {
-        Account account = accountRepository.findById(accountId)
-                .orElseThrow(IllegalArgumentException::new);
-        User user = userRepository.findById(userId)
-                .orElseThrow(IllegalArgumentException::new);
+        Account account = accountRepository.getById(accountId);
+        User user = userRepository.getUserBy(userId);
         account.registerUser(user);
 
         return account.getPlatform();
