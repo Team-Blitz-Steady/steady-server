@@ -43,31 +43,25 @@ public class UserService {
         return new UserNicknameExistResponse(userRepository.existsByNickname(nickname));
     }
 
-    @Transactional(readOnly = true)
-    public Stack getStack(Long stackId) {
-        return stackRepository.findById(stackId).orElseThrow(IllegalArgumentException::new);
+    private Stack getStack(Long stackId) {
+        return stackRepository.getById(stackId);
     }
 
-    @Transactional(readOnly = true)
-    public List<Stack> getStacks(List<Long> stackIds) {
+    private List<Stack> getStacks(List<Long> stackIds) {
         return stackIds.stream()
                 .map(this::getStack)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-    public Position getPosition(Long positionId) {
-        return positionRepository.findById(positionId)
-                .orElseThrow(IllegalArgumentException::new);
+    private Position getPosition(Long positionId) {
+        return positionRepository.getById(positionId);
     }
 
-    @Transactional
-    public List<UserStack> createUserStacks(List<Long> stackIds, User user) {
+    private List<UserStack> createUserStacks(List<Long> stackIds, User user) {
         List<Stack> stacks = getStacks(stackIds);
-        List<UserStack> userStacks = stacks.stream()
+        return stacks.stream()
                 .map(stack -> new UserStack(user, stack))
                 .toList();
-        return userStacks;
     }
 
 }
