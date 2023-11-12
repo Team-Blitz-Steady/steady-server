@@ -2,7 +2,7 @@ package dev.steady.auth.oauth.client;
 
 import dev.steady.auth.config.KakaoOAuthProperties;
 import dev.steady.auth.domain.Platform;
-import dev.steady.auth.exception.OAuthInvalidResponseException;
+import dev.steady.auth.exception.OAuthPlatformException;
 import dev.steady.auth.oauth.dto.KakaoToken;
 import dev.steady.auth.oauth.dto.response.KakaoUserInfoResponse;
 import dev.steady.auth.oauth.dto.response.OAuthUserInfoResponse;
@@ -13,7 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+
+import static dev.steady.auth.exception.AuthErrorCode.PLATFORM_TOKEN_REQUEST_FAILED;
+import static dev.steady.auth.exception.AuthErrorCode.PLATFORM_USER_REQUEST_FAILED;
 
 @Component
 @RequiredArgsConstructor
@@ -42,14 +46,21 @@ public class KakaoOAuthClient implements OAuthClient {
         body.add("client_secret", kakaoOAuthProperties.getClientSecret());
         body.add("code", authCode);
 
-        KakaoToken token = restTemplate.postForObject(
-                REQUEST_TOKEN_URL,
-                new HttpEntity<>(body, httpHeaders),
-                KakaoToken.class
-        );
+        try {
+            KakaoToken token = restTemplate.postForObject(
+                    REQUEST_TOKEN_URL,
+                    new HttpEntity<>(body, httpHeaders),
+                    KakaoToken.class
+            );
 
-        if (token == null) throw new OAuthInvalidResponseException("토큰을 발급 받을 수 없습니다.");
-        return token.accessToken();
+            if (token == null) {
+                throw new OAuthPlatformException(PLATFORM_TOKEN_REQUEST_FAILED);
+            }
+
+            return token.accessToken();
+        } catch (HttpStatusCodeException exception) {
+            throw new OAuthPlatformException(PLATFORM_TOKEN_REQUEST_FAILED);
+        }
     }
 
     @Override
@@ -58,14 +69,21 @@ public class KakaoOAuthClient implements OAuthClient {
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         httpHeaders.setBearerAuth(accessToken);
 
-        KakaoUserInfoResponse response = restTemplate.postForObject(
-                REQUEST_USER_INFO_URL,
-                new HttpEntity<>(httpHeaders),
-                KakaoUserInfoResponse.class
-        );
+        try {
+            KakaoUserInfoResponse response = restTemplate.postForObject(
+                    REQUEST_USER_INFO_URL,
+                    new HttpEntity<>(httpHeaders),
+                    KakaoUserInfoResponse.class
+            );
 
-        if (response == null) throw new OAuthInvalidResponseException("사용자 정보를 가져올 수 없습니다.");
-        return response;
+            if (response == null) {
+                throw new OAuthPlatformException(PLATFORM_USER_REQUEST_FAILED);
+            }
+
+            return response;
+        } catch (HttpStatusCodeException exception) {
+            throw new OAuthPlatformException(PLATFORM_USER_REQUEST_FAILED);
+        }
     }
 
 }
