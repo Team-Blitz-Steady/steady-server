@@ -1,6 +1,6 @@
 package dev.steady.global.exception;
 
-public class AuthenticationException extends BusinessException{
+public class AuthenticationException extends BusinessException {
 
     private final ErrorCode errorCode;
 

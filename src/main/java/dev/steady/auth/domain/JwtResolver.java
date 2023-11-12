@@ -1,16 +1,23 @@
 package dev.steady.auth.domain;
 
 import dev.steady.auth.config.JwtProperties;
-import dev.steady.auth.exception.JwtInvalidException;
 import dev.steady.global.auth.Authentication;
+import dev.steady.global.exception.AuthenticationException;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+
+import static dev.steady.auth.exception.AuthErrorCode.TOKEN_EMPTY;
+import static dev.steady.auth.exception.AuthErrorCode.TOKEN_EXPIRED;
+import static dev.steady.auth.exception.AuthErrorCode.TOKEN_INVALID;
 
 @Component
 public class JwtResolver {
@@ -37,7 +44,11 @@ public class JwtResolver {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (IllegalArgumentException exception) {
-            throw new JwtInvalidException("토큰이 존재하지 않습니다.");
+            throw new AuthenticationException(TOKEN_EMPTY);
+        } catch (ExpiredJwtException exception) {
+            throw new AuthenticationException(TOKEN_EXPIRED);
+        } catch (MalformedJwtException | SignatureException exception) {
+            throw new AuthenticationException(TOKEN_INVALID);
         }
     }
 
