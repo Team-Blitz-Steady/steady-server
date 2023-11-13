@@ -10,6 +10,7 @@ import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import dev.steady.user.domain.repository.UserStackRepository;
 import dev.steady.user.dto.request.UserCreateRequest;
+import dev.steady.user.dto.request.UserUpdateRequest;
 import dev.steady.user.dto.response.UserDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserDetailResponse getMyUserDetail(UserInfo userInfo) {
         User user = userRepository.getUserBy(userInfo.userId());
-        List<UserStack> userStacks = userStackRepository.findAllByUserId(userInfo.userId());
+        List<UserStack> userStacks = userStackRepository.findAllByUser(user);
 
         return UserDetailResponse.from(user, userStacks);
     }

@@ -65,14 +65,12 @@ class UserServiceTest {
         var request = new UserCreateRequest(1L, "Nickname", savedPosition.getId(), stackIds);
         var userId = userService.createUser(request);
 
-        var userStacks = userStackRepository.findAllByUserId(userId);
-
-
         User user = transactionTemplate.execute(status -> {
             var foundUser = userRepository.findById(userId).get();
             foundUser.getPosition().getName();
             return foundUser;
         });
+        var userStacks = userStackRepository.findAllByUser(user);
 
         assertAll(
                 () -> assertThat(user.getId()).isEqualTo(userId),
