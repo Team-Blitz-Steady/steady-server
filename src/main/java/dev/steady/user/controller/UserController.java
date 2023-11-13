@@ -6,12 +6,14 @@ import dev.steady.auth.service.AccountService;
 import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.user.dto.request.UserCreateRequest;
+import dev.steady.user.dto.request.UserUpdateRequest;
 import dev.steady.user.dto.response.UserDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import dev.steady.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,6 +44,13 @@ public class UserController {
     public ResponseEntity<UserDetailResponse> getMyUserDetail(@Auth UserInfo userInfo) {
         UserDetailResponse response = userService.getMyUserDetail(userInfo);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/profile")
+    public ResponseEntity<Void> getMyUserDetail(@RequestBody UserUpdateRequest request,
+                                                @Auth UserInfo userInfo) {
+        userService.updateUser(request, userInfo);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/profile/exist")
