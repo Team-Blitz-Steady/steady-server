@@ -1,5 +1,8 @@
 package dev.steady.user.service;
 
+import dev.steady.auth.domain.Account;
+import dev.steady.auth.domain.Platform;
+import dev.steady.auth.domain.repository.AccountRepository;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
@@ -11,7 +14,7 @@ import dev.steady.user.domain.repository.UserRepository;
 import dev.steady.user.domain.repository.UserStackRepository;
 import dev.steady.user.dto.request.UserCreateRequest;
 import dev.steady.user.dto.request.UserUpdateRequest;
-import dev.steady.user.dto.response.UserDetailResponse;
+import dev.steady.user.dto.response.UserMyDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,13 +30,14 @@ public class UserService {
     private final StackRepository stackRepository;
     private final PositionRepository positionRepository;
     private final UserStackRepository userStackRepository;
+    private final AccountRepository accountRepository;
 
     @Transactional(readOnly = true)
-    public UserDetailResponse getMyUserDetail(UserInfo userInfo) {
+    public UserMyDetailResponse getMyUserDetail(UserInfo userInfo) {
         User user = userRepository.getUserBy(userInfo.userId());
         List<UserStack> userStacks = userStackRepository.findAllByUser(user);
-
-        return UserDetailResponse.from(user, userStacks);
+        Platform platform = getAccount(user).getPlatform();
+        return UserMyDetailResponse.from(platform, user, userStacks);
     }
 
     @Transactional
@@ -88,6 +92,10 @@ public class UserService {
         return stacks.stream()
                 .map(stack -> new UserStack(user, stack))
                 .toList();
+    }
+
+    private Account getAccount(User user) {
+        return accountRepository.findByUser(user);
     }
 
 }

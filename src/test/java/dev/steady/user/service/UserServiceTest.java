@@ -1,5 +1,6 @@
 package dev.steady.user.service;
 
+import dev.steady.auth.domain.repository.AccountRepository;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -9,7 +10,7 @@ import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import dev.steady.user.domain.repository.UserStackRepository;
 import dev.steady.user.dto.request.UserCreateRequest;
-import dev.steady.user.dto.response.UserDetailResponse;
+import dev.steady.user.dto.response.UserMyDetailResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +22,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static dev.steady.auth.fixture.AccountFixture.createAccount;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
 import static dev.steady.user.fixture.UserFixtures.createFirstUser;
 import static dev.steady.user.fixture.UserFixtures.createPosition;
@@ -48,6 +50,9 @@ class UserServiceTest {
     private UserStackRepository userStackRepository;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private TransactionTemplate transactionTemplate;
 
     private Position position;
@@ -60,6 +65,7 @@ class UserServiceTest {
     @AfterEach
     void tearDown() {
         userStackRepository.deleteAll();
+        accountRepository.deleteAll();
         userRepository.deleteAll();
         positionRepository.deleteAll();
         stackRepository.deleteAll();
@@ -99,9 +105,11 @@ class UserServiceTest {
         // given
         var savedUser = userRepository.save(createFirstUser(position));
         var userInfo = createUserInfo(savedUser.getId());
+        var account = createAccount(savedUser);
+        var savedAccount = accountRepository.save(account);
 
         // when
-        UserDetailResponse response = userService.getMyUserDetail(userInfo);
+        UserMyDetailResponse response = userService.getMyUserDetail(userInfo);
         User user = transactionTemplate.execute(status -> {
             var foundUser = userRepository.findById(userInfo.userId()).get();
             foundUser.getPosition().getName();
@@ -111,6 +119,7 @@ class UserServiceTest {
 
         // then
         assertAll(
+                () -> assertThat(response.platform()).isEqualTo(savedAccount.getPlatform()),
                 () -> assertThat(response.userId()).isEqualTo(user.getId()),
                 () -> assertThat(response.nickname()).isEqualTo(user.getNickname()),
                 () -> assertThat(response.profileImage()).isEqualTo(user.getProfileImage()),
