@@ -7,7 +7,7 @@ import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.user.dto.request.UserCreateRequest;
 import dev.steady.user.dto.request.UserUpdateRequest;
-import dev.steady.user.dto.response.UserDetailResponse;
+import dev.steady.user.dto.response.UserMyDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import dev.steady.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +41,8 @@ public class UserController {
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<UserDetailResponse> getMyUserDetail(@Auth UserInfo userInfo) {
-        UserDetailResponse response = userService.getMyUserDetail(userInfo);
+    public ResponseEntity<UserMyDetailResponse> getMyUserDetail(@Auth UserInfo userInfo) {
+        UserMyDetailResponse response = userService.getMyUserDetail(userInfo);
         return ResponseEntity.ok(response);
     }
 
