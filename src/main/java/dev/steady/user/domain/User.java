@@ -56,5 +56,15 @@ public class User extends BaseEntity {
         this.profileImage = DEFAULT_PROFILE_IMAGE_URL;
     }
 
+    public void update(String profileImage,
+                       String nickname,
+                       String bio,
+                       Position position) {
+        this.profileImage = profileImage;
+        this.nickname = nickname;
+        this.bio = bio;
+        this.position = position;
+    }
+    
 }
 

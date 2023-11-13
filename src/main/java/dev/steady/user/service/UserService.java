@@ -49,6 +49,21 @@ public class UserService {
         return savedUser.getId();
     }
 
+    @Transactional
+    public void updateUser(UserUpdateRequest request, UserInfo userInfo) {
+        User user = userRepository.getUserBy(userInfo.userId());
+        Position updatedPosition = positionRepository.getById(request.positionId());
+        user.update(request.profileImage(),
+                request.nickname(),
+                request.bio(),
+                updatedPosition
+        );
+
+        userStackRepository.deleteAllByUser(user);
+        List<UserStack> userStacks = createUserStacks(request.stackIds(), user);
+        userStackRepository.saveAll(userStacks);
+    }
+
     @Transactional(readOnly = true)
     public UserNicknameExistResponse existsByNickname(String nickname) {
         return new UserNicknameExistResponse(userRepository.existsByNickname(nickname));
