@@ -23,7 +23,10 @@ public class AuthorizedArgumentResolver implements HandlerMethodArgumentResolver
     @Override
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-        return UserInfo.from(authContext);
+
+        UserInfo userInfo = UserInfo.from(authContext);
+
+        return userInfo;
     }
 
 }
