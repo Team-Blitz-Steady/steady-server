@@ -106,7 +106,7 @@ public class SteadyFixtures {
                 .build();
     }
 
-    public static Steady createFinishedSteady(User user, Stack stack) {
+    public static Steady createFinishedSteady(User user, Stack stack, LocalDate finishedAt) {
         Steady steady = Steady.builder()
                 .name("스테디")
                 .bio("bio")
@@ -121,6 +121,7 @@ public class SteadyFixtures {
                 .steadyMode(ONLINE)
                 .build();
         ReflectionTestUtils.setField(steady, "status", SteadyStatus.FINISHED);
+        ReflectionTestUtils.setField(steady, "finishedAt", finishedAt);
 
         return steady;
     }
