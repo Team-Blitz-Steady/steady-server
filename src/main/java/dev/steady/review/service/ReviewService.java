@@ -24,6 +24,7 @@ import java.util.Objects;
 
 import static dev.steady.review.exception.ReviewErrorCode.REVIEWEE_EQUALS_REVIEWER;
 import static dev.steady.review.exception.ReviewErrorCode.REVIEW_DUPLICATE;
+import static dev.steady.review.exception.ReviewErrorCode.REVIEW_NOT_ENABLED_PERIOD;
 import static dev.steady.review.exception.ReviewErrorCode.STEADY_NOT_FINISHED;
 
 @Service
@@ -49,6 +50,10 @@ public class ReviewService {
 
         if (!steady.isFinished()) {
             throw new InvalidStateException(STEADY_NOT_FINISHED);
+        }
+
+        if (steady.isReviewEnabled()) {
+            throw new InvalidStateException(REVIEW_NOT_ENABLED_PERIOD);
         }
 
         Participant reviewer = participants.getParticipantByUserId(reviewerId);
