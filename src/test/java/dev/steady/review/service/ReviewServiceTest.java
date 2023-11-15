@@ -1,15 +1,16 @@
 package dev.steady.review.service;
 
+import dev.steady.global.exception.InvalidStateException;
 import dev.steady.review.domain.Card;
 import dev.steady.review.domain.Review;
 import dev.steady.review.domain.UserCard;
 import dev.steady.review.domain.repository.CardRepository;
 import dev.steady.review.domain.repository.ReviewRepository;
 import dev.steady.review.domain.repository.UserCardRepository;
-import dev.steady.steady.domain.Participant;
-import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.repository.ParticipantRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
+import dev.steady.user.domain.Stack;
+import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -35,6 +37,7 @@ import static dev.steady.user.fixture.UserFixtures.createSecondUser;
 import static dev.steady.user.fixture.UserFixtures.createStack;
 import static dev.steady.user.fixture.UserFixtures.createThirdUser;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
@@ -61,23 +64,18 @@ class ReviewServiceTest {
     @Autowired
     private StackRepository stackRepository;
 
-    private Steady steady;
-    private Participant reviewer;
-    private Participant reviewee;
+    private Stack stack;
+    private User leader;
+    private User reviewerUser;
+    private User revieweeUser;
 
     @BeforeEach
     void setUp() {
         var position = positionRepository.save(createPosition());
-        var stack = stackRepository.save(createStack());
-
-        var leaderUser = userRepository.save(createFirstUser(position));
-        var reviewerUser = userRepository.save(createSecondUser(position));
-        var revieweeUser = userRepository.save(createThirdUser(position));
-
-        this.steady = steadyRepository.save(createFinishedSteady(leaderUser, stack));
-
-        this.reviewer = participantRepository.save(createMember(reviewerUser, steady));
-        this.reviewee = participantRepository.save(createMember(revieweeUser, steady));
+        this.stack = stackRepository.save(createStack());
+        this.leader = userRepository.save(createFirstUser(position));
+        this.reviewerUser = userRepository.save(createSecondUser(position));
+        this.revieweeUser = userRepository.save(createThirdUser(position));
     }
 
     @AfterEach
@@ -96,23 +94,22 @@ class ReviewServiceTest {
     @Test
     void createReview() {
         // given
-        var userInfo = createUserInfo(reviewer.getUserId());
+        var userInfo = createUserInfo(reviewerUser.getId());
+        var steady = steadyRepository.save(createFinishedSteady(leader, stack, LocalDate.now()));
 
-        // when
+        var reviewer = participantRepository.save(createMember(reviewerUser, steady));
+        var reviewee = participantRepository.save(createMember(revieweeUser, steady));
+
         var request = createReviewCreateRequest(
                 reviewee.getUserId(),
                 List.of(1L, 2L)
         );
 
+        // when
         var reviewId = reviewService.createReview(steady.getId(), request, userInfo);
-        Review review = transactionTemplate.execute(status -> {
-            var foundReview = reviewRepository.findById(reviewId).get();
-            foundReview.getReviewer();
-            foundReview.getReviewee();
-            return foundReview;
-        });
 
         // then
+        Review review = reviewRepository.getById(reviewId);
         assertAll(
                 () -> assertThat(review.getId()).isEqualTo(reviewId),
                 () -> assertThat(review.getReviewer().getId()).isEqualTo(reviewer.getId()),
@@ -120,14 +117,37 @@ class ReviewServiceTest {
         );
     }
 
-    @DisplayName("사용자의 리뷰 카드를 생성할 수 있다.")
     @Test
+    @DisplayName("리뷰 가능 기간이 지나면 리뷰를 생성할 수 없다.")
+    void createReviewAfterReviewEnabledPeriod() {
+        // given
+        var userInfo = createUserInfo(reviewerUser.getId());
+        var finishedAt = LocalDate.now().minusMonths(3);
+        var steady = steadyRepository.save(createFinishedSteady(leader, stack, finishedAt));
+        var reviewer = participantRepository.save(createMember(reviewerUser, steady));
+        var reviewee = participantRepository.save(createMember(revieweeUser, steady));
+        var request = createReviewCreateRequest(
+                reviewee.getUserId(),
+                List.of(1L, 2L)
+        );
+
+        // when, then
+        assertThatThrownBy(
+                () -> reviewService.createReview(steady.getId(), request, userInfo)
+        ).isInstanceOf(InvalidStateException.class);
+    }
+
+    @Test
+    @DisplayName("사용자의 리뷰 카드를 생성할 수 있다.")
     void createUserCards() {
         // given
         List<Card> cards = IntStream.range(0, 3)
                 .mapToObj(i -> createCard())
                 .toList();
         cardRepository.saveAll(cards);
+
+        var steady = steadyRepository.save(createFinishedSteady(reviewerUser, stack, LocalDate.now()));
+        var reviewee = participantRepository.save(createMember(revieweeUser, steady));
 
         // when
         List<Long> cardIds = List.of(1L, 2L);
