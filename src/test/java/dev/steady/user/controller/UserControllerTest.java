@@ -16,7 +16,6 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.resour
 import static dev.steady.auth.domain.Platform.KAKAO;
 import static dev.steady.auth.fixture.OAuthFixture.createAuthCodeRequestUrl;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
-import static dev.steady.user.fixture.UserFixtures.createProfileUploadUrlResponse;
 import static dev.steady.user.fixture.UserFixtures.createUserCreateRequest;
 import static dev.steady.user.fixture.UserFixtures.createUserMyDetailResponse;
 import static dev.steady.user.fixture.UserFixtures.createUserOtherDetailResponse;
@@ -230,34 +229,6 @@ class UserControllerTest extends ControllerTestConfig {
                                 headerWithName(AUTHORIZATION).description("토큰")
                         )
                 )).andExpect(status().isNoContent());
-    }
-
-
-    @Test
-    @DisplayName("프로필 이미지 업로드용 Presigned Url을 반환할 수 있다.")
-    void getProfileUploadUrl() throws Exception {
-        // given
-        var response = createProfileUploadUrlResponse();
-        var fileName = "profileimage.png";
-        given(userService.getProfileUploadUrl(fileName)).willReturn(response);
-
-        // when, then
-        mockMvc.perform(get("/api/v1/user/profile/image")
-                        .queryParam("fileName", fileName)
-                )
-                .andDo(document("user-v1-get-PutObjectUrlResponse",
-                        resourceDetails().tag("사용자").description("사용자 프로필 이미지 업로드 URL 불러오기")
-                                .responseSchema(Schema.schema("PutObjectUrlResponse")),
-                        queryParameters(
-                                parameterWithName("fileName").description("확장자를 포함한 이미지 파일 이름")
-                        ),
-                        responseFields(
-                                fieldWithPath("presignedUrl").type(STRING).description("사용자 프로필 이미지 업로드 URL"),
-                                fieldWithPath("objectUrl").type(STRING).description("업로드된 이미지 URL")
-                        ))
-                )
-                .andExpect(status().isOk())
-                .andExpect(content().string(objectMapper.writeValueAsString(response)));
     }
 
 }

@@ -7,7 +7,6 @@ import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.user.dto.request.UserCreateRequest;
 import dev.steady.user.dto.request.UserUpdateRequest;
-import dev.steady.user.dto.response.PutObjectUrlResponse;
 import dev.steady.user.dto.response.UserMyDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
 import dev.steady.user.dto.response.UserOtherDetailResponse;
@@ -73,12 +72,6 @@ public class UserController {
     public ResponseEntity<Void> withdrawUser(@Auth UserInfo userInfo) {
         userService.withdrawUser(userInfo);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/profile/image")
-    public ResponseEntity<PutObjectUrlResponse> getProfileUploadUrl(@RequestParam String fileName) {
-        PutObjectUrlResponse response = userService.getProfileUploadUrl(fileName);
-        return ResponseEntity.ok(response);
     }
 
 }

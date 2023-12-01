@@ -17,6 +17,8 @@ import dev.steady.steady.controller.SteadyController;
 import dev.steady.steady.controller.SteadyLikeController;
 import dev.steady.steady.service.SteadyLikeService;
 import dev.steady.steady.service.SteadyService;
+import dev.steady.storage.controller.StorageImageController;
+import dev.steady.storage.service.StorageService;
 import dev.steady.template.controller.TemplateController;
 import dev.steady.template.service.TemplateService;
 import dev.steady.user.controller.PositionController;
@@ -51,6 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
         PositionController.class,
         NotificationController.class,
         ReviewController.class,
+        StorageImageController.class,
         AuthContext.class,
         JwtResolver.class,
         JwtProperties.class,
@@ -87,6 +90,8 @@ public abstract class ControllerTestConfig {
     protected NotificationService notificationService;
     @MockBean
     protected ReviewService reviewService;
+    @MockBean
+    protected StorageService storageService;
     @MockBean
     protected JwtResolver jwtResolver;
 

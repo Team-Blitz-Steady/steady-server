@@ -8,7 +8,7 @@ import dev.steady.review.domain.repository.UserCardRepository;
 import dev.steady.review.dto.response.UserCardResponse;
 import dev.steady.steady.domain.Participant;
 import dev.steady.steady.domain.repository.ParticipantRepository;
-import dev.steady.storage.StorageService;
+import dev.steady.storage.service.StorageService;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -19,7 +19,6 @@ import dev.steady.user.domain.repository.UserRepository;
 import dev.steady.user.domain.repository.UserStackRepository;
 import dev.steady.user.dto.request.UserCreateRequest;
 import dev.steady.user.dto.request.UserUpdateRequest;
-import dev.steady.user.dto.response.PutObjectUrlResponse;
 import dev.steady.user.dto.response.UserDetailResponse;
 import dev.steady.user.dto.response.UserMyDetailResponse;
 import dev.steady.user.dto.response.UserNicknameExistResponse;
@@ -115,10 +114,6 @@ public class UserService {
         List<Participant> participants = participantRepository.findByUser(user);
         participants.forEach(reviewRepository::deleteAllByReviewee);
         accountRepository.deleteByUser(user);
-    }
-
-    public PutObjectUrlResponse getProfileUploadUrl(String fileName) {
-        return storageService.generatePutObjectUrl(fileName, PROFILE_IMAGE_KEY_PATTERN);
     }
 
     private Stack getStack(Long stackId) {

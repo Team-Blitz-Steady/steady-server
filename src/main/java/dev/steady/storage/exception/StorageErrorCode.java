@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum StorageErrorCode implements ErrorCode {
 
-    NOT_SUPPORTED_FILE_TYPE("ST01", "지원하지 않는 파일 유형입니다.");
+    NOT_SUPPORTED_FILE_TYPE("ST01", "지원하지 않는 파일 유형입니다."),
+    NOT_SUPPORTED_PURPOSE("ST02", "지원하지 않는 용도입니다.");
 
     private final String code;
     private final String message;
@@ -22,5 +23,5 @@ public enum StorageErrorCode implements ErrorCode {
     public String message() {
         return this.message;
     }
-    
+
 }

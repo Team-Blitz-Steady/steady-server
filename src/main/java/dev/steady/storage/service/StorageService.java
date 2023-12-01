@@ -1,4 +1,4 @@
-package dev.steady.storage;
+package dev.steady.storage.service;
 
 import dev.steady.global.exception.InvalidValueException;
 import dev.steady.user.dto.response.PutObjectUrlResponse;
