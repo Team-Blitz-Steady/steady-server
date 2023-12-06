@@ -89,6 +89,14 @@ public class SteadyService {
         return PageResponse.from(searchResponses);
     }
 
+    @Transactional(readOnly = true)
+    public PageResponse<SteadySearchResponse> test(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
+        Page<Steady> test = steadyRepository.test(userInfo, conditionDto, pageable);
+        Page<SteadySearchResponse> map = test
+                .map(v -> SteadySearchResponse.from(v, getLikeCount(v)));
+        return PageResponse.from(map);
+    }
+
     @Transactional
     public SteadyDetailResponse getDetailSteady(Long steadyId, UserInfo userInfo) {
         Steady steady = steadyRepository.getSteady(steadyId);

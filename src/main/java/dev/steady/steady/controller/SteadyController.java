@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,6 +66,15 @@ public class SteadyController {
         Pageable pageable = request.toPageable();
         PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<PageResponse<SteadySearchResponse>> test(@Auth(required = false) UserInfo userInfo,
+                                                SteadySearchRequest request) {
+        SearchConditionDto condition = SearchConditionDto.from(request);
+        Pageable pageable = request.toPageable();
+        PageResponse<SteadySearchResponse> test = steadyService.test(userInfo, condition, pageable);
+        return ResponseEntity.ok(test);
     }
 
     @GetMapping("/{steadyId}")

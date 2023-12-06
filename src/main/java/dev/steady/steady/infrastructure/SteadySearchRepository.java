@@ -15,4 +15,6 @@ public interface SteadySearchRepository {
     Page<Steady> findAllBySearchCondition(UserInfo userInfo, SearchConditionDto condition, Pageable pageable);
 
     Slice<MySteadyQueryResponse> findMySteadies(SteadyStatus status, User user, Pageable pageable);
+
+    Page<Steady> test(UserInfo userInfo, SearchConditionDto condition, Pageable pageable);
 }
