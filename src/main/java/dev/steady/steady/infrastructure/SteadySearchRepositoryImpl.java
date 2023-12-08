@@ -10,6 +10,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.jpa.sql.JPASQLQuery;
+import com.querydsl.sql.SQLExpressions;
 import com.querydsl.sql.SQLTemplates;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.Participant;
@@ -53,55 +54,107 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
     private final SQLTemplates sqlTemplates;
 
     @Override
-    public Page<Steady> test(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
+    public Page<Steady> test(UserInfo userInfo, SearchConditionDto condition, Pageable pageable) {
         JPASQLQuery<?> jpaSqlQuery = new JPASQLQuery<>(entityManager, sqlTemplates);
         StringPath subQueryAlias = Expressions.stringPath("sub_query_steady");
-        StringPath countSubQueryAlias = Expressions.stringPath("count_sub_query_steady");
         DateTimePath<LocalDateTime> promotedAt = Expressions.dateTimePath(LocalDateTime.class, steady, "promoted_at");
 
-        List<Steady> steadies = jpaSqlQuery
-                .select(steady)
+        List<Long> ids = jpaSqlQuery
+                .select(steady.id)
                 .distinct()
                 .from(steady)
-                .innerJoin(
-                        JPAExpressions.select(steady.id, promotedAt).distinct()
+                .innerJoin(JPAExpressions.select(steady.id, promotedAt).distinct()
                                 .from(steady)
                                 .leftJoin(steadyLike).on(steady.id.eq(Expressions.numberPath(Long.class, steadyLike, "steady_id")))
-                                .where(isLikedSteady(conditionDto.like(), userInfo))
-                                .orderBy(promotedAt.desc())
-                                .offset(pageable.getOffset())
-                                .limit(pageable.getPageSize()),
-                        subQueryAlias
-                )
+                                .where(isLikedSteady(condition.like(), userInfo)),
+                        subQueryAlias)
                 .on(steady.id.eq(
                         Expressions.numberPath(Long.class, subQueryAlias, "id")
                 ))
-                .innerJoin(steadyStack)
-                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyStack, "steady_id")))
-                .innerJoin(steadyPosition)
-                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyPosition, "steady_id")))
                 .fetch();
 
-        JPASQLQuery<Long> count = jpaSqlQuery
-                .select(steady.count())
+        List<Steady> steadies = jpaQueryFactory
+                .selectFrom(steady)
                 .distinct()
-                .from(steady)
-                .innerJoin(
-                        JPAExpressions.select(steady.id, promotedAt).distinct()
-                                .from(steady)
-                                .leftJoin(steadyLike).on(steady.id.eq(Expressions.numberPath(Long.class, steadyLike, "steady_id")))
-                                .where(isLikedSteady(conditionDto.like(), userInfo)),
-                        countSubQueryAlias
-                )
-                .on(steady.id.eq(
-                        Expressions.numberPath(Long.class, countSubQueryAlias, "id")))
-                .innerJoin(steadyStack)
-                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyStack, "steady_id")))
+                .innerJoin(steady.steadyStacks, steadyStack)
                 .innerJoin(steadyPosition)
-                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyPosition, "steady_id")));
+                .on(steady.id.eq(steadyPosition.steady.id))
+                .where(steady.id.in(ids))
+                .orderBy(orderBySort(pageable.getSort(), Steady.class))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        JPAQuery<Steady> count = jpaQueryFactory
+                .selectFrom(steady)
+                .distinct()
+                .innerJoin(steady.steadyStacks, steadyStack)
+                .innerJoin(steadyPosition)
+                .on(steady.id.eq(steadyPosition.steady.id))
+                .where(searchCondition(userInfo, condition));
+
+//        JPAQuery<Steady> count = jpaQueryFactory
+//                .selectFrom(steady)
+//                .distinct()
+//                .innerJoin(steady.steadyStacks, steadyStack)
+//                .innerJoin(steadyPosition)
+//                .on(steady.id.eq(steadyPosition.steady.id))
+//                .leftJoin(steadyLike)
+//                .on(steady.id.eq(steadyLike.steady.id))
+//                .where(searchCondition(userInfo, condition));
 
         return PageableExecutionUtils.getPage(steadies, pageable, count::fetchCount);
     }
+
+//    @Override
+//    public Page<Steady> test(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
+//        JPASQLQuery<?> jpaSqlQuery = new JPASQLQuery<>(entityManager, sqlTemplates);
+//        StringPath subQueryAlias = Expressions.stringPath("sub_query_steady");
+//        StringPath countSubQueryAlias = Expressions.stringPath("count_sub_query_steady");
+//        DateTimePath<LocalDateTime> promotedAt = Expressions.dateTimePath(LocalDateTime.class, steady, "promoted_at");
+//
+//        List<Steady> steadies = jpaSqlQuery
+//                .select(steady)
+//                .distinct()
+//                .from(steady)
+//                .innerJoin(
+//                        SQLExpressions.select(steady.id, promotedAt).distinct()
+//                                .from(steady)
+//                                .leftJoin(steadyLike).on(steady.id.eq(Expressions.numberPath(Long.class, steadyLike, "steady_id")))
+//                                .where(isLikedSteady(conditionDto.like(), userInfo))
+//                                .orderBy(promotedAt.desc())
+//                                .offset(pageable.getOffset())
+//                                .limit(pageable.getPageSize()),
+//                        subQueryAlias
+//                )
+//                .on(steady.id.eq(
+//                        Expressions.numberPath(Long.class, subQueryAlias, "id")
+//                ))
+//                .innerJoin(steadyStack)
+//                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyStack, "steady_id")))
+//                .innerJoin(steadyPosition)
+//                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyPosition, "steady_id")))
+//                .fetch();
+//
+//        JPASQLQuery<Steady> count = jpaSqlQuery
+//                .select(steady)
+//                .distinct()
+//                .from(steady)
+//                .innerJoin(
+//                        SQLExpressions.select(steady.id, promotedAt).distinct()
+//                                .from(steady)
+//                                .leftJoin(steadyLike).on(steady.id.eq(Expressions.numberPath(Long.class, steadyLike, "steady_id")))
+//                                .where(isLikedSteady(conditionDto.like(), userInfo)),
+//                        countSubQueryAlias
+//                )
+//                .on(steady.id.eq(
+//                        Expressions.numberPath(Long.class, countSubQueryAlias, "id")))
+//                .innerJoin(steadyStack)
+//                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyStack, "steady_id")))
+//                .innerJoin(steadyPosition)
+//                .on(steady.id.eq(Expressions.numberPath(Long.class, steadyPosition, "steady_id")));
+//
+//        return PageableExecutionUtils.getPage(steadies, pageable, ()-> count.fetch().size());
 
     @Override
     public Page<Steady> findAllBySearchCondition(UserInfo userInfo, SearchConditionDto condition, Pageable pageable) {
@@ -121,13 +174,13 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
 
         JPAQuery<Steady> count = jpaQueryFactory
                 .selectFrom(steady)
+                .distinct()
                 .innerJoin(steady.steadyStacks, steadyStack)
                 .innerJoin(steadyPosition)
                 .on(steady.id.eq(steadyPosition.steady.id))
                 .leftJoin(steadyLike)
                 .on(steady.id.eq(steadyLike.steady.id))
-                .where(searchCondition(userInfo, condition))
-                .distinct();
+                .where(searchCondition(userInfo, condition));
 
         return PageableExecutionUtils.getPage(steadies, pageable, count::fetchCount);
     }
