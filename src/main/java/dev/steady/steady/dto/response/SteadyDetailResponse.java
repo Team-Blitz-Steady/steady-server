@@ -4,6 +4,7 @@ import dev.steady.steady.domain.ScheduledPeriod;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyPosition;
+import dev.steady.steady.domain.SteadyStack;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
 
@@ -40,6 +41,7 @@ public record SteadyDetailResponse(
 
     public static SteadyDetailResponse of(Steady steady,
                                           List<SteadyPosition> positions,
+                                          List<SteadyStack> stacks,
                                           boolean isLeader,
                                           Long applicationId,
                                           boolean isLiked) {
@@ -61,7 +63,7 @@ public record SteadyDetailResponse(
                 positions.stream()
                         .map(SteadyPositionResponse::from)
                         .toList(),
-                steady.getSteadyStacks().stream()
+                stacks.stream()
                         .map(SteadyStackResponse::from)
                         .toList(),
                 isLeader,
