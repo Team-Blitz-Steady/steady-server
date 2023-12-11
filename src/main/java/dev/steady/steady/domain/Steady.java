@@ -37,7 +37,6 @@ public class Steady extends BaseEntity {
 
     private static final long REVIEW_POLICY = 2L;
     private static final int DEFAULT_VIEW_COUNT = 0;
-    private static final int DEFAULT_LIKE_COUNT = 0;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
