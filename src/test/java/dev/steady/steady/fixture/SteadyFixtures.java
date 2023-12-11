@@ -7,6 +7,7 @@ import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyPosition;
 import dev.steady.steady.domain.SteadyQuestion;
+import dev.steady.steady.domain.SteadyStack;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
@@ -105,9 +106,12 @@ public class SteadyFixtures {
                 .title("title")
                 .content("content")
                 .user(user)
-                .stacks(List.of(stack))
                 .steadyMode(ONLINE)
                 .build();
+    }
+
+    public static SteadyStack createSteadyStack(Steady steady, Stack stack) {
+        return new SteadyStack(stack, steady);
     }
 
     public static SteadyPosition createSteadyPosition(Steady steady, Position position) {
@@ -148,7 +152,6 @@ public class SteadyFixtures {
                 .title("게시글 제목")
                 .content("내용")
                 .user(user)
-                .stacks(stacks)
                 .build();
         ReflectionTestUtils.setField(steady, "status", status);
         return steady;
