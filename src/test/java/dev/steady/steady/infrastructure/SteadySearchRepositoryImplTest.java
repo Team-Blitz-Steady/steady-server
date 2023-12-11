@@ -76,7 +76,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
@@ -119,7 +119,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
@@ -157,7 +157,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());

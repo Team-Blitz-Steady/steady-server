@@ -183,6 +183,7 @@ class SteadyControllerTest extends ControllerTestConfig {
         }};
 
         var pageable = searchRequest.toPageable();
+        var condition = FilterConditionDto.from(searchRequest);
         var steady = createSteady();
         var response = createSteadyPageResponse(steady, pageable);
 

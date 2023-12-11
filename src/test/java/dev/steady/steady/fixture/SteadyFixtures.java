@@ -127,7 +127,7 @@ public class SteadyFixtures {
     public static Steady createSteady() {
         var user = UserFixtures.createFirstUser(UserFixtures.createPosition());
         var stack = UserFixtures.createStack();
-        var steady = createSteadyRequest(1L, 1L).toEntity(user, List.of(stack));
+        var steady = createSteadyRequest(1L, 1L).toEntity(user);
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(stack, "id", 1L);
         ReflectionTestUtils.setField(steady, "id", 1L);
