@@ -185,6 +185,7 @@ public class SteadyService {
         User user = userRepository.getUserBy(userInfo.userId());
         Steady steady = steadyRepository.getSteady(steadyId);
         if (steady.isDeletable(user)) {
+            steadyStackRepository.deleteBySteadyId(steadyId);
             steadyPositionRepository.deleteBySteadyId(steadyId);
             steadyQuestionRepository.deleteBySteadyId(steadyId);
             steadyRepository.delete(steady);
