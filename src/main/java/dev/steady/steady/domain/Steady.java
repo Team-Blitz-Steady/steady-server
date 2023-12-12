@@ -136,7 +136,7 @@ public class Steady extends BaseEntity {
                        SteadyStatus status,
                        int participantLimit,
                        SteadyMode steadyMode,
-                       String scheduledPeriod,
+                       ScheduledPeriod scheduledPeriod,
                        LocalDate deadline,
                        String title,
                        String content,
@@ -149,7 +149,7 @@ public class Steady extends BaseEntity {
         this.status = status;
         this.participants.updateParticipantLimit(participantLimit);
         this.steadyMode = steadyMode;
-        this.scheduledPeriod = ScheduledPeriod.valueOf(scheduledPeriod);
+        this.scheduledPeriod = scheduledPeriod;
         this.deadline = deadline;
         this.title = title;
         this.content = content;
