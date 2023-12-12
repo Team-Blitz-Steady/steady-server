@@ -53,7 +53,6 @@ public record SteadyCreateRequest(
                 .type(type)
                 .participantLimit(participantLimit)
                 .steadyMode(steadyMode)
-//                .scheduledPeriod(ScheduledPeriod.valueOf(scheduledPeriod))
                 .scheduledPeriod(scheduledPeriod)
                 .deadline(deadline)
                 .title(title)

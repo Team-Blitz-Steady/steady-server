@@ -33,6 +33,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.IntStream;
 
+import static dev.steady.steady.domain.ScheduledPeriod.FIVE_MONTH;
+import static dev.steady.steady.domain.ScheduledPeriod.FIVE_WEEK;
+import static dev.steady.steady.domain.ScheduledPeriod.ONE_WEEK;
+import static dev.steady.steady.domain.ScheduledPeriod.TWO_WEEK;
 import static dev.steady.steady.domain.SteadyMode.OFFLINE;
 import static dev.steady.steady.domain.SteadyMode.ONLINE;
 import static dev.steady.steady.domain.SteadyType.PROJECT;
@@ -48,7 +52,7 @@ public class SteadyFixtures {
                 .type(STUDY)
                 .participantLimit(6)
                 .steadyMode(ONLINE)
-                .scheduledPeriod("ONE_WEEK")
+                .scheduledPeriod(ONE_WEEK)
                 .deadline(LocalDate.now().plusDays(7))
                 .title("스테디원 모집합니다")
                 .content("많관부")
@@ -66,7 +70,7 @@ public class SteadyFixtures {
                 .type(PROJECT)
                 .participantLimit(6)
                 .steadyMode(OFFLINE)
-                .scheduledPeriod("TWO_WEEK")
+                .scheduledPeriod(FIVE_WEEK)
                 .deadline(LocalDate.now().plusDays(14))
                 .title("스테디원 모집합니다")
                 .content("많관부")
@@ -85,7 +89,7 @@ public class SteadyFixtures {
                 .status(SteadyStatus.CLOSED)
                 .participantLimit(5)
                 .steadyMode(SteadyMode.BOTH)
-                .scheduledPeriod("TWO_WEEK")
+                .scheduledPeriod(TWO_WEEK)
                 .deadline(LocalDate.now().plusDays(14))
                 .title("스테디가 진행중입니다.")
                 .content("앞으로 화이팅!")
@@ -101,7 +105,7 @@ public class SteadyFixtures {
                 .contact("email")
                 .type(STUDY)
                 .participantLimit(6)
-                .scheduledPeriod(ScheduledPeriod.FIVE_MONTH)
+                .scheduledPeriod(FIVE_MONTH)
                 .deadline(LocalDate.of(2025, 1, 2))
                 .title("title")
                 .content("content")
@@ -147,7 +151,7 @@ public class SteadyFixtures {
                 .type(STUDY)
                 .participantLimit(5)
                 .steadyMode(SteadyMode.BOTH)
-                .scheduledPeriod(ScheduledPeriod.FIVE_MONTH)
+                .scheduledPeriod(FIVE_MONTH)
                 .deadline(LocalDate.of(2023, 12, 20))
                 .title("게시글 제목")
                 .content("내용")

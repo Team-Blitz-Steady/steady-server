@@ -31,8 +31,10 @@ import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
+import dev.steady.user.fixture.UserFixturesV2;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,12 +56,14 @@ import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestion;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyRequest;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyUpdateRequest;
+import static dev.steady.steady.fixture.SteadyFixturesV2.*;
 import static dev.steady.user.fixture.UserFixtures.createAnotherPosition;
 import static dev.steady.user.fixture.UserFixtures.createAnotherStack;
 import static dev.steady.user.fixture.UserFixtures.createFirstUser;
 import static dev.steady.user.fixture.UserFixtures.createPosition;
 import static dev.steady.user.fixture.UserFixtures.createSecondUser;
 import static dev.steady.user.fixture.UserFixtures.createStack;
+import static dev.steady.user.fixture.UserFixturesV2.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -98,23 +102,31 @@ class SteadyServiceTest {
     @Autowired
     private SteadyPositionRepository steadyPositionRepository;
 
+    private Position position;
+    private Stack stack;
+    private User leader;
+
+    @BeforeEach
+    void setUp() {
+        position = positionRepository.save(createPosition());
+        stack = stackRepository.save(createStack());
+        leader = userRepository.save(generateUser(position));
+    }
+
     @Test
     @DisplayName("스터디 생성 요청을 통해 스테디와 스테디 관련 정보를 생성할 수 있다.")
     void createSteadyTest() {
         // given
-        var position = positionRepository.save(createPosition());
-        var leader = userRepository.save(createFirstUser(position));
-        var stack = stackRepository.save(createStack());
         var userInfo = createUserInfo(leader.getId());
 
         // when
-        SteadyCreateRequest steadyRequest = createSteadyRequest(stack.getId(), position.getId());
+        SteadyCreateRequest steadyRequest = generateSteadyCreateRequest();
         Long steadyId = steadyService.create(steadyRequest, userInfo);
         entityManager.flush();
         entityManager.clear();
 
         // then
-        Steady steady = steadyRepository.findById(steadyId).get();
+        Steady steady = steadyRepository.getSteady(steadyId);
         List<Participant> participants = participantRepository.findBySteadyId(steadyId);
         List<SteadyStack> steadyStacks = steadyStackRepository.findBySteadyId(steadyId);
         List<SteadyQuestion> steadyQuestions = steadyQuestionRepository.findBySteadyId(steadyId);
