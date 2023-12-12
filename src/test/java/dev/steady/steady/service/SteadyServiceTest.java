@@ -31,8 +31,8 @@ import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
-import dev.steady.user.fixture.UserFixturesV2;
 import jakarta.persistence.EntityManager;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -120,7 +120,7 @@ class SteadyServiceTest {
         var userInfo = createUserInfo(leader.getId());
 
         // when
-        SteadyCreateRequest steadyRequest = generateSteadyCreateRequest();
+        SteadyCreateRequest steadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
         Long steadyId = steadyService.create(steadyRequest, userInfo);
         entityManager.flush();
         entityManager.clear();
@@ -141,33 +141,20 @@ class SteadyServiceTest {
     }
 
     @Test
-    @DisplayName("스테디 검색 조회 요청을 통해 페이징 처리된 응답을 반환할 수 있다.")
+    @DisplayName("스테디 페이징 요청을 통해 끌어올린 시간을 기준으로 내림차순 정렬된 응답을 반환할 수 있다.")
     void getSteadiesSearchTest() {
         // given
-        var position = positionRepository.save(createPosition());
-        var leader = userRepository.save(createFirstUser(position));
-        var stack = stackRepository.save(createStack());
         var userInfo = createUserInfo(leader.getId());
 
-        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var anotherSteadyRequest = createAnotherSteadyRequest(stack.getId(), position.getId());
+        var steadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
+        var anotherSteadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
         steadyService.create(steadyRequest, userInfo);
         steadyService.create(anotherSteadyRequest, userInfo);
         entityManager.flush();
         entityManager.clear();
 
         // when
-        SteadySearchRequest searchRequest = new SteadySearchRequest(null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "false",
-                null);
+        SteadySearchRequest searchRequest = createDefaultSteadySearchRequest();
         FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
         PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
@@ -440,7 +427,7 @@ class SteadyServiceTest {
                 () -> assertThat(updatedSteady.getStatus()).isEqualTo(steadyUpdateRequest.status()),
                 () -> assertThat(updatedSteady.getParticipantLimit()).isEqualTo(steadyUpdateRequest.participantLimit()),
                 () -> assertThat(updatedSteady.getSteadyMode()).isEqualTo(steadyUpdateRequest.steadyMode()),
-                () -> assertThat(String.valueOf(updatedSteady.getScheduledPeriod())).isEqualTo(steadyUpdateRequest.scheduledPeriod()),
+                () -> assertThat(updatedSteady.getScheduledPeriod()).isEqualTo(steadyUpdateRequest.scheduledPeriod()),
                 () -> assertThat(updatedSteady.getDeadline()).isEqualTo(steadyUpdateRequest.deadline()),
                 () -> assertThat(updatedSteady.getTitle()).isEqualTo(steadyUpdateRequest.title()),
                 () -> assertThat(updatedSteady.getContent()).isEqualTo(steadyUpdateRequest.content()),
