@@ -98,7 +98,7 @@ public class SteadyFixtures {
                 .build();
     }
 
-    public static Steady createSteady(User user, Stack stack) {
+    public static Steady createSteady(User leader, Stack stack) {
         return Steady.builder()
                 .name("스테디")
                 .bio("boi")
@@ -109,7 +109,7 @@ public class SteadyFixtures {
                 .deadline(LocalDate.of(2025, 1, 2))
                 .title("title")
                 .content("content")
-                .user(user)
+                .leader(leader)
                 .steadyMode(ONLINE)
                 .build();
     }
@@ -143,7 +143,7 @@ public class SteadyFixtures {
         return steady;
     }
 
-    public static Steady createSteady(User user, List<Stack> stacks, SteadyStatus status) {
+    public static Steady createSteady(User leader, List<Stack> stacks, SteadyStatus status) {
         Steady steady = Steady.builder()
                 .name("스테디 제목")
                 .bio("Bio")
@@ -155,7 +155,7 @@ public class SteadyFixtures {
                 .deadline(LocalDate.of(2023, 12, 20))
                 .title("게시글 제목")
                 .content("내용")
-                .user(user)
+                .leader(leader)
                 .build();
         ReflectionTestUtils.setField(steady, "status", status);
         return steady;

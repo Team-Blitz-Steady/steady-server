@@ -32,7 +32,6 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -56,14 +55,16 @@ import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestion;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyRequest;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyUpdateRequest;
-import static dev.steady.steady.fixture.SteadyFixturesV2.*;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createOrderByDeadLineSteadySearchRequest;
+import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyCreateRequest;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
 import static dev.steady.user.fixture.UserFixtures.createAnotherPosition;
 import static dev.steady.user.fixture.UserFixtures.createAnotherStack;
 import static dev.steady.user.fixture.UserFixtures.createFirstUser;
 import static dev.steady.user.fixture.UserFixtures.createPosition;
 import static dev.steady.user.fixture.UserFixtures.createSecondUser;
 import static dev.steady.user.fixture.UserFixtures.createStack;
-import static dev.steady.user.fixture.UserFixturesV2.*;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -172,31 +173,17 @@ class SteadyServiceTest {
     @DisplayName("마감임박순 조건을 통해 페이징 처리된 응답을 반환할 수 있다.")
     void getSteadiesSearchOrderByDeadlineTest() {
         // given
-        var position = positionRepository.save(createPosition());
-        var leader = userRepository.save(createFirstUser(position));
-        var stack = stackRepository.save(createStack());
         var userInfo = createUserInfo(leader.getId());
 
-        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var anotherSteadyRequest = createAnotherSteadyRequest(stack.getId(), position.getId());
+        var steadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
+        var anotherSteadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
         steadyService.create(steadyRequest, userInfo);
         steadyService.create(anotherSteadyRequest, userInfo);
         entityManager.flush();
         entityManager.clear();
 
         // when
-        SteadySearchRequest searchRequest = new SteadySearchRequest(
-                null,
-                "asc",
-                "deadline",
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                "false",
-                null);
+        SteadySearchRequest searchRequest = createOrderByDeadLineSteadySearchRequest();
         FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
         PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);

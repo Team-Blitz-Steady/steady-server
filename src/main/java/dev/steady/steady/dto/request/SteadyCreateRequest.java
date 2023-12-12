@@ -45,7 +45,7 @@ public record SteadyCreateRequest(
         List<String> questions
 ) {
 
-    public Steady toEntity(User user) {
+    public Steady toEntity(User leader) {
         return Steady.builder()
                 .name(name)
                 .bio(bio)
@@ -57,7 +57,7 @@ public record SteadyCreateRequest(
                 .deadline(deadline)
                 .title(title)
                 .content(content)
-                .user(user)
+                .leader(leader)
                 .build();
     }
 

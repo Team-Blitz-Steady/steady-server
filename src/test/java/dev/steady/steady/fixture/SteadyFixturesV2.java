@@ -1,12 +1,18 @@
 package dev.steady.steady.fixture;
 
+import dev.steady.steady.domain.Steady;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
+import dev.steady.user.domain.User;
 import org.instancio.Instancio;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import static dev.steady.steady.domain.ScheduledPeriod.FIVE_MONTH;
+import static dev.steady.steady.domain.SteadyMode.ONLINE;
+import static dev.steady.steady.domain.SteadyType.STUDY;
 import static org.instancio.Select.field;
 
 public class SteadyFixturesV2 {
@@ -33,6 +39,22 @@ public class SteadyFixturesV2 {
                 .create();
     }
 
+    public static Steady createSteady(User leader) {
+        return Steady.builder()
+                .name("테스트 스테디")
+                .bio("우리 스터디는 정말 열심히 합니다.")
+                .contact("geonhee33@gmail.com")
+                .type(STUDY)
+                .participantLimit(5)
+                .steadyMode(ONLINE)
+                .scheduledPeriod(FIVE_MONTH)
+                .deadline(LocalDate.of(2030, 1, 2))
+                .title("스테디 제목")
+                .content("스테디 본문")
+                .leader(leader)
+                .build();
+    }
+
     public static SteadySearchRequest createDefaultSteadySearchRequest() {
         return new SteadySearchRequest(
                 null,
@@ -45,6 +67,19 @@ public class SteadyFixturesV2 {
                 null,
                 "false",
                 null);
+    }
+
+    public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
+        return new SteadySearchRequest(null,
+                        null,
+                        "asc",
+                        "deadline",
+                        null,
+                        null,
+                        null,
+                        null,
+                        "false",
+                        null);
     }
 
 }
