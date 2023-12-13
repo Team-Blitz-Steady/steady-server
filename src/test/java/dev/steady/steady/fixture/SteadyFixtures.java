@@ -2,7 +2,6 @@ package dev.steady.steady.fixture;
 
 
 import dev.steady.application.dto.response.SliceResponse;
-import dev.steady.steady.domain.ScheduledPeriod;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyPosition;
