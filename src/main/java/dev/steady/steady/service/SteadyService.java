@@ -49,7 +49,6 @@ import java.util.stream.IntStream;
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
 import static dev.steady.steady.exception.SteadyErrorCode.STEADY_IS_NOT_EMPTY;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SteadyService {
@@ -92,7 +91,6 @@ public class SteadyService {
 
     @Transactional
     public SteadyDetailResponse getDetailSteady(Long steadyId, UserInfo userInfo) {
-        log.info("서비스 진입");
         Steady steady = steadyRepository.getSteady(steadyId);
         List<SteadyPosition> positions = steadyPositionRepository.findBySteadyId(steady.getId());
 
