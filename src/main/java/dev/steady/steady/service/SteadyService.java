@@ -35,6 +35,7 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -48,6 +49,7 @@ import java.util.stream.IntStream;
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
 import static dev.steady.steady.exception.SteadyErrorCode.STEADY_IS_NOT_EMPTY;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SteadyService {
@@ -90,6 +92,7 @@ public class SteadyService {
 
     @Transactional
     public SteadyDetailResponse getDetailSteady(Long steadyId, UserInfo userInfo) {
+        log.info("서비스 진입");
         Steady steady = steadyRepository.getSteady(steadyId);
         List<SteadyPosition> positions = steadyPositionRepository.findBySteadyId(steady.getId());
 
@@ -105,6 +108,7 @@ public class SteadyService {
             if (!isLeader) {
                 applicationId = findSubmittedApplicationId(user, steady);
             }
+
             processViewCountLog(user, steady);
         }
 

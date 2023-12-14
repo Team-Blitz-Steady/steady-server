@@ -30,17 +30,18 @@ public class SteadyLikeService {
 
         switchLike(steadyLike, steady, user);
 
-        int likeCount = steadyLikeRepository.countBySteady(steady);
         boolean isLiked = steadyLike.isEmpty();
-        return new SteadyLikeResponse(likeCount, isLiked);
+        return new SteadyLikeResponse(steady.getLikeCount(), isLiked);
     }
 
     private void switchLike(Optional<SteadyLike> steadyLike, Steady steady, User user) {
         if (steadyLike.isPresent()) {
             steadyLikeRepository.delete(steadyLike.get());
+            steady.decreaseLikeCount();
             return;
         }
         steadyLikeRepository.save(new SteadyLike(user, steady));
+        steady.increaseLikeCount();
     }
 
 }
