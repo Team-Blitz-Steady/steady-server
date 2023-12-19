@@ -35,6 +35,7 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -105,6 +106,7 @@ public class SteadyService {
             if (!isLeader) {
                 applicationId = findSubmittedApplicationId(user, steady);
             }
+
             processViewCountLog(user, steady);
         }
 

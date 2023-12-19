@@ -16,6 +16,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,7 @@ public class Steady extends BaseEntity {
 
     private static final long REVIEW_POLICY = 2L;
     private static final int DEFAULT_VIEW_COUNT = 0;
+    private static final int DEFAULT_LIKE_COUNT = 0;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,6 +82,8 @@ public class Steady extends BaseEntity {
 
     private int viewCount;
 
+    private int likeCount;
+
     @Embedded
     private Promotion promotion;
 
@@ -90,6 +94,9 @@ public class Steady extends BaseEntity {
     private List<SteadyStack> steadyStacks = new ArrayList<>();
 
     private LocalDate finishedAt;
+
+    @Version
+    private int version;
 
     @Builder
     private Steady(String name,
@@ -118,6 +125,7 @@ public class Steady extends BaseEntity {
         this.title = title;
         this.content = content;
         this.viewCount = DEFAULT_VIEW_COUNT;
+        this.likeCount = DEFAULT_LIKE_COUNT;
         this.steadyStacks = createSteadyStack(stacks);
     }
 
@@ -220,6 +228,14 @@ public class Steady extends BaseEntity {
 
     public void increaseViewCount() {
         this.viewCount++;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount++;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount--;
     }
 
     private Participants createParticipants(User user, int participantLimit) {
