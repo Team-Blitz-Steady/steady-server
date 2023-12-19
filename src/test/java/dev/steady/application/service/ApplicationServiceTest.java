@@ -107,7 +107,8 @@ class ApplicationServiceTest {
         //given
         var steady = steadyRepository.save(createSteady(leader, stack));
         var surveyResultRequests = createSurveyResultRequests();
-        var userInfo = createUserInfo(leader.getId());
+        var otherUser = userRepository.save(createSecondUser(position));
+        var userInfo = createUserInfo(otherUser.getId());
 
         //when
         CreateApplicationResponse response = applicationService.createApplication(steady.getId(),
