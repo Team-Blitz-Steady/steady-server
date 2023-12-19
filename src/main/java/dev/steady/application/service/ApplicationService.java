@@ -14,8 +14,6 @@ import dev.steady.application.dto.response.CreateApplicationResponse;
 import dev.steady.application.dto.response.MyApplicationSummaryResponse;
 import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
-import dev.steady.global.exception.DuplicateException;
-import dev.steady.global.exception.ForbiddenException;
 import dev.steady.notification.domain.ApplicationResultNotificationStrategy;
 import dev.steady.notification.domain.FreshApplicationNotificationStrategy;
 import dev.steady.notification.domain.NotificationStrategy;
@@ -36,8 +34,6 @@ import java.util.stream.IntStream;
 
 import static dev.steady.application.domain.ApplicationStatus.ACCEPTED;
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
-import static dev.steady.application.exception.ApplicationErrorCode.APPLICATION_DUPLICATION;
-import static dev.steady.application.exception.ApplicationErrorCode.STEADY_LEADER_SUBMISSION;
 
 @Slf4j
 @Service
@@ -144,6 +140,30 @@ public class ApplicationService {
 
     private void validateApplicationDuplication(Long steadyId, User user) {
         applicationRepository.findBySteadyIdAndUserId(steadyId, user.getId())
+                .ifPresent(application -> {
+                    throw new DuplicateException(APPLICATION_DUPLICATION);
+                });
+    }
+
+    private void saveSurveyResults(Application application, List<SurveyResultRequest> requests) {
+        List<SurveyResult> surveyResults = createSurveyResults(application, requests);
+        surveyResultRepository.saveAll(surveyResults);
+    }
+
+    private Application saveApplication(User user, Steady steady) {
+        Application application = new Application(user, steady);
+        return applicationRepository.save(application);
+    }
+
+    private void checkIfLeaderAndValidateDuplication(Steady steady, User user, Long steadyId) {
+        if (steady.isLeader(user)) {
+            throw new ForbiddenException(STEADY_LEADER_SUBMISSION);
+        }
+        validateApplicationDuplication(steadyId, user);
+    }
+
+    private void validateApplicationDuplication(Long steadyId, User user) {
+        applicationRepository.findBySteadyIdAndUserIdAndStatus(steadyId, user.getId(), WAITING)
                 .ifPresent(application -> {
                     throw new DuplicateException(APPLICATION_DUPLICATION);
                 });
