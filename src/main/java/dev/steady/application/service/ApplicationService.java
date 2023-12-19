@@ -14,6 +14,8 @@ import dev.steady.application.dto.response.CreateApplicationResponse;
 import dev.steady.application.dto.response.MyApplicationSummaryResponse;
 import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
+import dev.steady.global.exception.DuplicateException;
+import dev.steady.global.exception.ForbiddenException;
 import dev.steady.notification.domain.ApplicationResultNotificationStrategy;
 import dev.steady.notification.domain.FreshApplicationNotificationStrategy;
 import dev.steady.notification.domain.NotificationStrategy;
@@ -34,6 +36,8 @@ import java.util.stream.IntStream;
 
 import static dev.steady.application.domain.ApplicationStatus.ACCEPTED;
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
+import static dev.steady.application.exception.ApplicationErrorCode.APPLICATION_DUPLICATION;
+import static dev.steady.application.exception.ApplicationErrorCode.STEADY_LEADER_SUBMISSION;
 
 @Slf4j
 @Service
@@ -50,15 +54,13 @@ public class ApplicationService {
     public CreateApplicationResponse createApplication(Long steadyId, List<SurveyResultRequest> request, UserInfo userInfo) {
         User user = userRepository.getUserBy(userInfo.userId());
         Steady steady = steadyRepository.getSteady(steadyId);
+        checkIfLeaderAndValidateDuplication(steady, user, steadyId);
 
-        Application application = new Application(user, steady);
-        Application savedApplication = applicationRepository.save(application);
-
-        List<SurveyResult> surveyResult = createSurveyResult(application, request);
-        surveyResultRepository.saveAll(surveyResult);
+        Application application = saveApplication(user, steady);
+        saveSurveyResults(application, request);
 
         createNotification(new FreshApplicationNotificationStrategy(steady));
-        return CreateApplicationResponse.from(savedApplication);
+        return CreateApplicationResponse.from(application);
     }
 
     @Transactional(readOnly = true)
@@ -123,13 +125,37 @@ public class ApplicationService {
         applicationRepository.delete(application);
     }
 
+    private void saveSurveyResults(Application application, List<SurveyResultRequest> requests) {
+        List<SurveyResult> surveyResults = createSurveyResults(application, requests);
+        surveyResultRepository.saveAll(surveyResults);
+    }
+
+    private Application saveApplication(User user, Steady steady) {
+        Application application = new Application(user, steady);
+        return applicationRepository.save(application);
+    }
+
+    private void checkIfLeaderAndValidateDuplication(Steady steady, User user, Long steadyId) {
+        if (steady.isLeader(user)) {
+            throw new ForbiddenException(STEADY_LEADER_SUBMISSION);
+        }
+        validateApplicationDuplication(steadyId, user);
+    }
+
+    private void validateApplicationDuplication(Long steadyId, User user) {
+        applicationRepository.findBySteadyIdAndUserIdAndStatus(steadyId, user.getId(), WAITING)
+                .ifPresent(application -> {
+                    throw new DuplicateException(APPLICATION_DUPLICATION);
+                });
+    }
+
     private void addParticipant(Application application, User leader) {
         Steady steady = application.getSteady();
         User user = application.getUser();
         steady.addParticipantByLeader(leader, user);
     }
 
-    private List<SurveyResult> createSurveyResult(Application application, List<SurveyResultRequest> surveys) {
+    private List<SurveyResult> createSurveyResults(Application application, List<SurveyResultRequest> surveys) {
         return IntStream.range(0, surveys.size())
                 .mapToObj(index -> SurveyResult.create(application,
                         surveys.get(index).question(),
