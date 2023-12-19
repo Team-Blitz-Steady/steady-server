@@ -143,7 +143,7 @@ public class ApplicationService {
     }
 
     private void validateApplicationDuplication(Long steadyId, User user) {
-        applicationRepository.findBySteadyIdAndUserIdAndStatus(steadyId, user.getId(), WAITING)
+        applicationRepository.findBySteadyIdAndUserId(steadyId, user.getId())
                 .ifPresent(application -> {
                     throw new DuplicateException(APPLICATION_DUPLICATION);
                 });
