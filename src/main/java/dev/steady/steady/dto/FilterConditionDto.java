@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public record SearchConditionDto(
+public record FilterConditionDto(
         SteadyType steadyType,
         SteadyMode steadyMode,
         List<String> stacks,
@@ -20,7 +20,7 @@ public record SearchConditionDto(
         String keyword
 ) {
 
-    public static SearchConditionDto from(SteadySearchRequest request) {
+    public static FilterConditionDto from(SteadySearchRequest request) {
         SteadyType steadyType = filterSteadyType(request.steadyType());
         SteadyMode steadyMode = filterSteadyModeCondition(request.steadyMode());
         List<String> stack = filterStackOrPositionCondition(request.stack());
@@ -28,7 +28,7 @@ public record SearchConditionDto(
         SteadyStatus status = filterSteadyStatusCondition(request.status());
         boolean like = filterLikeCondition(request.like());
 
-        return new SearchConditionDto(steadyType,
+        return new FilterConditionDto(steadyType,
                 steadyMode,
                 stack,
                 position,

@@ -5,7 +5,7 @@ import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.Authentication;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.global.config.ControllerTestConfig;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
@@ -177,7 +177,7 @@ class SteadyControllerTest extends ControllerTestConfig {
         }};
 
         var pageable = searchRequest.toPageable();
-        var condition = SearchConditionDto.from(searchRequest);
+        var condition = FilterConditionDto.from(searchRequest);
         var steady = createSteady();
         var response = createSteadyPageResponse(steady, pageable);
 

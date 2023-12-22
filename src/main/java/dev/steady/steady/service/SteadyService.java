@@ -17,7 +17,7 @@ import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.ViewCountLogRepository;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
@@ -82,7 +82,7 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<SteadySearchResponse> getSteadies(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
+    public PageResponse<SteadySearchResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
         Page<Steady> steadies = steadyRepository.findAllBySearchCondition(userInfo, conditionDto, pageable);
         Page<SteadySearchResponse> searchResponses = steadies
                 .map(steady -> SteadySearchResponse.from(steady, getLikeCount(steady)));
@@ -90,7 +90,7 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<SteadySearchResponse> test(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
+    public PageResponse<SteadySearchResponse> test(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
         Page<Steady> test = steadyRepository.test(userInfo, conditionDto, pageable);
         Page<SteadySearchResponse> map = test
                 .map(v -> SteadySearchResponse.from(v, getLikeCount(v)));

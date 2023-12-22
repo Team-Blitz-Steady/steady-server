@@ -16,7 +16,7 @@ import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.SteadyStackRepository;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
@@ -155,7 +155,7 @@ class SteadyServiceTest {
                 null,
                 "false",
                 null);
-        SearchConditionDto condition = SearchConditionDto.from(searchRequest);
+        FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
         PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
 
@@ -195,7 +195,7 @@ class SteadyServiceTest {
                 null,
                 "false",
                 null);
-        SearchConditionDto condition = SearchConditionDto.from(searchRequest);
+        FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
         PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
 

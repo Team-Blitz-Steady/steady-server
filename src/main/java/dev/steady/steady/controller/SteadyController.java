@@ -4,7 +4,7 @@ import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.SteadyStatus;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -62,7 +61,7 @@ public class SteadyController {
     @GetMapping("/search")
     public ResponseEntity<PageResponse<SteadySearchResponse>> getSteadies(@Auth(required = false) UserInfo userInfo,
                                                                           SteadySearchRequest request) {
-        SearchConditionDto condition = SearchConditionDto.from(request);
+        FilterConditionDto condition = FilterConditionDto.from(request);
         Pageable pageable = request.toPageable();
         PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
         return ResponseEntity.ok(response);
@@ -71,7 +70,7 @@ public class SteadyController {
     @GetMapping("/test")
     public ResponseEntity<PageResponse<SteadySearchResponse>> test(@Auth(required = false) UserInfo userInfo,
                                                 SteadySearchRequest request) {
-        SearchConditionDto condition = SearchConditionDto.from(request);
+        FilterConditionDto condition = FilterConditionDto.from(request);
         Pageable pageable = request.toPageable();
         PageResponse<SteadySearchResponse> test = steadyService.test(userInfo, condition, pageable);
         return ResponseEntity.ok(test);

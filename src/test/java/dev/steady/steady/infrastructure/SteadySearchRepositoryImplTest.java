@@ -6,7 +6,7 @@ import dev.steady.steady.domain.repository.ParticipantRepository;
 import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
 import dev.steady.user.domain.repository.PositionRepository;
@@ -97,7 +97,7 @@ class SteadySearchRepositoryImplTest {
                 "스테디");
 
         var pageable = request.toPageable();
-        var condition = SearchConditionDto.from(request);
+        var condition = FilterConditionDto.from(request);
         var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
         var returnedSteady = response.getContent().get(0);
 
@@ -138,7 +138,7 @@ class SteadySearchRepositoryImplTest {
                 "말도 안 되는 검색 조건!");
 
         var pageable = request.toPageable();
-        var condition = SearchConditionDto.from(request);
+        var condition = FilterConditionDto.from(request);
         var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
 
         // then
@@ -173,7 +173,7 @@ class SteadySearchRepositoryImplTest {
                 "false",
                 null);
         var pageable = request.toPageable();
-        var condition = SearchConditionDto.from(request);
+        var condition = FilterConditionDto.from(request);
         var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
 
         // then
