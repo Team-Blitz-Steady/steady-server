@@ -67,15 +67,6 @@ public class SteadyController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<PageResponse<SteadySearchResponse>> test(@Auth(required = false) UserInfo userInfo,
-                                                SteadySearchRequest request) {
-        FilterConditionDto condition = FilterConditionDto.from(request);
-        Pageable pageable = request.toPageable();
-        PageResponse<SteadySearchResponse> test = steadyService.test(userInfo, condition, pageable);
-        return ResponseEntity.ok(test);
-    }
-
     @GetMapping("/{steadyId}")
     public ResponseEntity<SteadyDetailResponse> getDetailSteady(@PathVariable Long steadyId,
                                                                 @Auth(required = false) UserInfo userInfo) {

@@ -3,6 +3,7 @@ package dev.steady.steady.infrastructure;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.DatePath;
 import com.querydsl.core.types.dsl.DateTimePath;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberPath;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -61,6 +63,7 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
         NumberPath<Long> subQueryId = Expressions.numberPath(Long.class, subQueryAlias, "id");
 
         DateTimePath<LocalDateTime> promotedAt = Expressions.dateTimePath(LocalDateTime.class, steady, "promoted_at");
+        DatePath<LocalDate> deadline = Expressions.datePath(LocalDate.class, steady, "deadline");
 
         NumberPath<Long> steadyLikeSteadyId = Expressions.numberPath(Long.class, steadyLike, "steady_id");
         NumberPath<Long> steadyStackSteadyId = Expressions.numberPath(Long.class, steadyStack, "steady_id");
@@ -71,11 +74,11 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
                 .distinct()
                 .from(steady)
                 .innerJoin(
-                        SQLExpressions.select(steady.id, promotedAt).distinct()
+                        SQLExpressions.select(steady.id, promotedAt, deadline).distinct()
                                 .from(steady)
                                 .leftJoin(steadyLike).on(steady.id.eq(steadyLikeSteadyId))
                                 .where(isLikedSteady(condition.like(), userInfo))
-                                .orderBy(promotedAt.desc())
+                                .orderBy(orderBySort(pageable.getSort(), Steady.class))
                                 .offset(pageable.getOffset())
                                 .limit(pageable.getPageSize()),
                         subQueryAlias
