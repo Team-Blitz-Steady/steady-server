@@ -35,7 +35,6 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -83,18 +82,10 @@ public class SteadyService {
 
     @Transactional(readOnly = true)
     public PageResponse<SteadySearchResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
-        Page<Steady> steadies = steadyRepository.findAllBySearchCondition(userInfo, conditionDto, pageable);
+        Page<Steady> steadies = steadyRepository.findAllByFilterCondition(userInfo, conditionDto, pageable);
         Page<SteadySearchResponse> searchResponses = steadies
-                .map(steady -> SteadySearchResponse.from(steady, getLikeCount(steady)));
+                .map(SteadySearchResponse::from);
         return PageResponse.from(searchResponses);
-    }
-
-    @Transactional(readOnly = true)
-    public PageResponse<SteadySearchResponse> test(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
-        Page<Steady> test = steadyRepository.test(userInfo, conditionDto, pageable);
-        Page<SteadySearchResponse> map = test
-                .map(v -> SteadySearchResponse.from(v, getLikeCount(v)));
-        return PageResponse.from(map);
     }
 
     @Transactional
@@ -268,10 +259,6 @@ public class SteadyService {
                         .steady(steady)
                         .build())
                 .toList();
-    }
-
-    private int getLikeCount(Steady steady) {
-        return steadyLikeRepository.countBySteady(steady);
     }
 
     private void updateSteadyPositions(Steady steady, List<Long> positions) {

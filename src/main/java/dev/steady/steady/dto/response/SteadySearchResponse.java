@@ -21,12 +21,12 @@ public record SteadySearchResponse(
         int participantLimit,
         int numberOfParticipants,
         int viewCount,
-        List<SteadyStackResponse> stacks,
-        int likeCount
+        int likeCount,
+        List<SteadyStackResponse> stacks
         // TODO: 2023-10-25  해쉬태그, 조회수, 댓글 수
 ) {
 
-    public static SteadySearchResponse from(Steady steady, int likeCount) {
+    public static SteadySearchResponse from(Steady steady) {
         User leader = steady.getParticipants().getLeader();
         List<SteadyStackResponse> stacks = steady.getSteadyStacks().stream()
                 .map(SteadyStackResponse::from)
@@ -42,8 +42,8 @@ public record SteadySearchResponse(
                 steady.getParticipantLimit(),
                 steady.getNumberOfParticipants(),
                 steady.getViewCount(),
-                stacks,
-                likeCount);
+                steady.getLikeCount(),
+                stacks);
     }
 
 }
