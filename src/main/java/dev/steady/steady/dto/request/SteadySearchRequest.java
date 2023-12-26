@@ -5,10 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public record SteadySearchRequest(
-        String steadyType,
         Integer page,
         String direction,
         String criteria,
+        String cursor,
+        String steadyType,
         String steadyMode,
         String stack,
         String position,
@@ -17,9 +18,9 @@ public record SteadySearchRequest(
         String keyword
 ) {
 
-    public static final int DEFAULT_PAGE = 0;
-    public static final int DEFAULT_SIZE = 10;
-    public static final String SORTING_CRITERIA = "promoted_at";
+    private static final int DEFAULT_PAGE = 0;
+    private static final int DEFAULT_SIZE = 50;
+    private static final String SORTING_CRITERIA = "promotion.promotedAt";
 
     public Pageable toPageable() {
         return PageRequest.of(
