@@ -16,9 +16,4 @@ public class QueryDslConfig {
         return new JPAQueryFactory(JPQLTemplates.DEFAULT, em);
     }
 
-    @Bean
-    public SQLTemplates mysqlTemplates() {
-        return MySQLTemplates.builder().build();
-    }
-
 }
