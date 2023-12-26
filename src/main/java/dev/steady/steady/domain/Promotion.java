@@ -18,7 +18,7 @@ public class Promotion {
     @Column(nullable = false)
     private int promotionCount;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP(6)")
     private LocalDateTime promotedAt;
 
     public Promotion() {
