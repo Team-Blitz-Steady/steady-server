@@ -35,6 +35,8 @@ import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestionsResp
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyRequest;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyUpdateRequest;
 import static dev.steady.user.fixture.UserFixtures.createPosition;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -153,35 +155,38 @@ class SteadyControllerTest extends ControllerTestConfig {
     @DisplayName("검색 조건에 따른 전체 조회 결과를 반환한다.")
     void getSteadiesByConditionTest() throws Exception {
         // given
-        var searchRequest = new SteadySearchRequest(null,
-                0,
-                "desc",
+        var searchRequest = new SteadySearchRequest(
                 null,
-                "online",
-                "Java",
-                "Backend",
-                "recruiting",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 "false",
-                "");
+                null);
+
         MultiValueMap params = new LinkedMultiValueMap<>() {{
-            add("steadyType", null);
-            add("page", "0");
-            add("direction", "desc");
+            add("page", null);
+            add("direction", null);
             add("criteria", null);
-            add("steadyMode", "online");
-            add("stack", "Java");
-            add("position", "Backend");
-            add("status", "recruiting");
+            add("cursor", null);
+            add("steadyType", null);
+            add("steadyMode", null);
+            add("stack", null);
+            add("position", null);
+            add("status", null);
             add("like", "false");
-            add("keyword", "");
+            add("keyword", null);
         }};
 
         var pageable = searchRequest.toPageable();
-        var condition = FilterConditionDto.from(searchRequest);
         var steady = createSteady();
         var response = createSteadyPageResponse(steady, pageable);
 
-        given(steadyService.getSteadies(new UserInfo(null), condition, pageable)).willReturn(response);
+        given(steadyService.getSteadies(eq(new UserInfo(null)), any(FilterConditionDto.class), eq(pageable))).willReturn(response);
 
         // when & then
         mockMvc.perform(get("/api/v1/steadies/search")
@@ -190,10 +195,11 @@ class SteadyControllerTest extends ControllerTestConfig {
                         resourceDetails().tag("스테디").description("스테디 검색 및 필터링 조회")
                                 .responseSchema(Schema.schema("PageResponse")),
                         queryParameters(
-                                parameterWithName("steadyType").description("스테디 타입").optional(),
                                 parameterWithName("page").description("요청 페이지 번호"),
                                 parameterWithName("direction").description("내림/오름차순").optional(),
                                 parameterWithName("criteria").description("정렬 조건").optional(),
+                                parameterWithName("cursor").description("페이징 커서").optional(),
+                                parameterWithName("steadyType").description("스테디 타입").optional(),
                                 parameterWithName("steadyMode").description("스테디 진행 방식").optional(),
                                 parameterWithName("stack").description("스테디 기술 스택").optional(),
                                 parameterWithName("position").description("스테디 포지션").optional(),
@@ -210,6 +216,7 @@ class SteadyControllerTest extends ControllerTestConfig {
                                 fieldWithPath("content[].status").type(STRING).description("스테디 상태"),
                                 fieldWithPath("content[].deadline").type(STRING).description("모집 마감일"),
                                 fieldWithPath("content[].createdAt").type(STRING).description("스테디 생성일"),
+                                fieldWithPath("content[].promotedAt").type(STRING).description("스테디 끌어올린 시간"),
                                 fieldWithPath("content[].participantLimit").type(NUMBER).description("모집 정원"),
                                 fieldWithPath("content[].numberOfParticipants").type(NUMBER).description("스테디 참여 인원"),
                                 fieldWithPath("content[].viewCount").type(NUMBER).description("조회수"),

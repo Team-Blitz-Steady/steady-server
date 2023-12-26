@@ -15,9 +15,9 @@ import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -154,9 +154,9 @@ public class SteadyFixtures {
         return steady;
     }
 
-    public static PageResponse<SteadySearchResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
+    public static PageResponse<SteadyQueryResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
         Page<Steady> steadies = new PageImpl<>(List.of(steady), pageable, 1);
-        return PageResponse.from(steadies.map(v -> SteadySearchResponse.from(v, 0)));
+        return PageResponse.from(steadies.map(SteadyQueryResponse::from));
     }
 
     public static ParticipantsResponse createParticipantsResponse() {

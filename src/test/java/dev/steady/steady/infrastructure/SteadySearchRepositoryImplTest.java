@@ -85,10 +85,12 @@ class SteadySearchRepositoryImplTest {
         entityManager.clear();
 
         // when
-        var request = new SteadySearchRequest("study",
-                0,
+        var request = new SteadySearchRequest(
+                null,
                 "DESC",
                 null,
+                null,
+                "study",
                 "online",
                 "Java",
                 "백엔드",
@@ -98,7 +100,7 @@ class SteadySearchRepositoryImplTest {
 
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
-        var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
+        var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
         var returnedSteady = response.getContent().get(0);
 
         // then
@@ -126,10 +128,12 @@ class SteadySearchRepositoryImplTest {
         entityManager.clear();
 
         // when
-        var request = new SteadySearchRequest("study",
-                0,
-                "DESC",
+        var request = new SteadySearchRequest(
                 null,
+                null,
+                null,
+                null,
+                "study",
                 "both",
                 "Java",
                 "데브옵스",
@@ -139,7 +143,7 @@ class SteadySearchRepositoryImplTest {
 
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
-        var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
+        var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
 
         // then
         assertThat(response.getTotalElements()).isZero();
@@ -162,9 +166,11 @@ class SteadySearchRepositoryImplTest {
         entityManager.clear();
 
         // when
-        var request = new SteadySearchRequest("study",
-                0,
-                "DESC",
+        var request = new SteadySearchRequest(
+                null,
+                null,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -174,7 +180,7 @@ class SteadySearchRepositoryImplTest {
                 null);
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
-        var response = queryDslRepository.findAllBySearchCondition(null, condition, pageable);
+        var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
 
         // then
         int expectedSize = 1;
