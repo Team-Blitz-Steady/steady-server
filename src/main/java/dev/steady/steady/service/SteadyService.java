@@ -26,8 +26,8 @@ import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -81,10 +81,9 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<SteadySearchResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
+    public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
         Page<Steady> steadies = steadyRepository.findAllByFilterCondition(userInfo, conditionDto, pageable);
-        Page<SteadySearchResponse> searchResponses = steadies
-                .map(SteadySearchResponse::from);
+        Page<SteadyQueryResponse> searchResponses = steadies.map(SteadyQueryResponse::from);
         return PageResponse.from(searchResponses);
     }
 
