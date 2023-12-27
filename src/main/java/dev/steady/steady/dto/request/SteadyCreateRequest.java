@@ -30,7 +30,7 @@ public record SteadyCreateRequest(
         @NotNull(message = "NULL은 올 수 없습니다.")
         SteadyMode steadyMode,
         @NotNull(message = "NULL은 올 수 없습니다.")
-        String scheduledPeriod,
+        ScheduledPeriod scheduledPeriod,
         @FutureOrPresent(message = "마감 종료일은 오늘 이후로 설정해야합니다.")
         LocalDate deadline,
         @Size(min = 2, max = 25, message = "모집글 제목은 2글자 이상 25글자 이하입니다.")
@@ -53,7 +53,7 @@ public record SteadyCreateRequest(
                 .type(type)
                 .participantLimit(participantLimit)
                 .steadyMode(steadyMode)
-                .scheduledPeriod(ScheduledPeriod.valueOf(scheduledPeriod))
+                .scheduledPeriod(scheduledPeriod)
                 .deadline(deadline)
                 .title(title)
                 .content(content)
