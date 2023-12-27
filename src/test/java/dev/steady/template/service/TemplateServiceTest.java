@@ -25,9 +25,8 @@ import java.util.List;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
 import static dev.steady.template.fixture.TemplateFixture.createAnotherTemplate;
 import static dev.steady.template.fixture.TemplateFixture.createTemplate;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createSecondUser;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -58,8 +57,8 @@ class TemplateServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.position = positionRepository.save(createPosition());
-        this.user = userRepository.save(createFirstUser(position));
+        this.position = positionRepository.save(generatePosition());
+        this.user = userRepository.save(generateUser(position));
     }
 
     @AfterEach
@@ -122,7 +121,7 @@ class TemplateServiceTest {
     @DisplayName("템플릿 식별자를 통해 템플릿을 상세조회할 때 작성자가 아니라면 예외가 발생한다.")
     @Test
     void getDetailTemplateFailTest() {
-        var anotherUser = userRepository.save(createSecondUser(position));
+        var anotherUser = userRepository.save(generateUser(position));
         var template = createTemplate(user);
         var savedTemplate = templateRepository.save(template);
         var userInfo = createUserInfo(anotherUser.getId());
@@ -171,7 +170,7 @@ class TemplateServiceTest {
     @Test
     void deleteTemplateFailTest() {
         //given
-        var otherUser = createSecondUser(position);
+        var otherUser = generateUser(position);
         var savedUser2 = userRepository.save(otherUser);
         var template = createTemplate(user);
         var savedTemplate = templateRepository.save(template);
