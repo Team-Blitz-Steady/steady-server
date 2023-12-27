@@ -237,17 +237,14 @@ public class SteadyService {
 
     private List<SteadyPosition> createSteadyPositions(List<Long> positions, Steady steady) {
         return IntStream.range(0, positions.size())
-                .mapToObj(index -> createSteadyPosition(positions, steady, index))
+                .mapToObj(index -> {
+                    Position position = positionRepository.getById(positions.get(index));
+                    return SteadyPosition.builder()
+                            .position(position)
+                            .steady(steady)
+                            .build();
+                })
                 .toList();
-    }
-
-    private SteadyPosition createSteadyPosition(List<Long> positions, Steady steady, int index) {
-        Position position = positionRepository.getById(positions.get(index));
-
-        return SteadyPosition.builder()
-                .position(position)
-                .steady(steady)
-                .build();
     }
 
     private List<SteadyQuestion> createSteadyQuestions(List<String> questions, Steady steady) {
