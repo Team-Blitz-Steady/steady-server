@@ -3,26 +3,27 @@ package dev.steady.steady.infrastructure;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.Participant;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyStatus;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
+import dev.steady.steady.uitl.Cursor;
 import dev.steady.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
-import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 
 import static dev.steady.steady.domain.QParticipant.participant;
 import static dev.steady.steady.domain.QSteady.steady;
@@ -43,32 +44,22 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Steady> findAllBySearchCondition(UserInfo userInfo, SearchConditionDto condition, Pageable pageable) {
+    public Page<Steady> findAllByFilterCondition(UserInfo userInfo, FilterConditionDto condition, Pageable pageable) {
         List<Steady> steadies = jpaQueryFactory
                 .selectFrom(steady)
-                .innerJoin(steady.steadyStacks, steadyStack)
+                .distinct()
+                .innerJoin(steadyStack)
+                .on(steady.id.eq(steadyStack.steady.id))
                 .innerJoin(steadyPosition)
                 .on(steady.id.eq(steadyPosition.steady.id))
                 .leftJoin(steadyLike)
                 .on(steady.id.eq(steadyLike.steady.id))
-                .where(searchCondition(userInfo, condition))
+                .where(filterConditionBuilder(userInfo, condition))
                 .orderBy(orderBySort(pageable.getSort(), Steady.class))
-                .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .distinct()
                 .fetch();
 
-        JPAQuery<Steady> count = jpaQueryFactory
-                .selectFrom(steady)
-                .innerJoin(steady.steadyStacks, steadyStack)
-                .innerJoin(steadyPosition)
-                .on(steady.id.eq(steadyPosition.steady.id))
-                .leftJoin(steadyLike)
-                .on(steady.id.eq(steadyLike.steady.id))
-                .where(searchCondition(userInfo, condition))
-                .distinct();
-
-        return PageableExecutionUtils.getPage(steadies, pageable, count::fetchCount);
+        return new PageImpl<>(steadies, pageable, steadies.size());
     }
 
     @Override
@@ -83,7 +74,7 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
                 .from(steady)
                 .innerJoin(participant).on(participant.steady.id.eq(steady.id))
                 .where(
-                        isFinishSteady(status),
+                        isFinishedSteady(status),
                         isWorkSteady(status),
                         isParticipantUserIdEqual(user),
                         isParticipantNotDeleted()
@@ -107,7 +98,7 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
         return participant.isDeleted.isFalse();
     }
 
-    private BooleanExpression isFinishSteady(SteadyStatus status) {
+    private BooleanExpression isFinishedSteady(SteadyStatus status) {
         if (FINISHED == status) {
             return steady.status.eq(FINISHED);
         }
@@ -122,8 +113,15 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
         return null;
     }
 
-    private BooleanBuilder searchCondition(UserInfo userInfo, SearchConditionDto condition) {
+    private BooleanBuilder filterConditionBuilder(UserInfo userInfo, FilterConditionDto condition) {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
+
+        Cursor cursor = condition.cursor();
+        if (Objects.isNull(cursor.getPromotedAt())) {
+            booleanBuilder.and(filterCondition(cursor.getDeadline(), steady.deadline::goe));
+        }
+        booleanBuilder.and(filterCondition(cursor.getPromotedAt(), steady.promotion.promotedAt::lt));
+
         booleanBuilder.and(filterCondition(condition.steadyType(), steady.type::eq));
         booleanBuilder.and(filterCondition(condition.steadyMode(), steady.steadyMode::eq));
         booleanBuilder.and(filterCondition(condition.stacks(), steadyStack.stack.name::in));
@@ -136,6 +134,7 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
             return booleanBuilder.and(filterCondition(condition.keyword(), steady.title::contains))
                     .or(filterCondition(condition.keyword(), steady.content::contains));
         }
+
         return booleanBuilder;
     }
 

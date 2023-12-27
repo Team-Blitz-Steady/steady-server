@@ -16,7 +16,7 @@ import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.SteadyStackRepository;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
@@ -25,8 +25,8 @@ import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
@@ -146,7 +146,8 @@ class SteadyServiceTest {
 
         // when
         SteadySearchRequest searchRequest = new SteadySearchRequest(null,
-                0,
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -155,16 +156,16 @@ class SteadyServiceTest {
                 null,
                 "false",
                 null);
-        SearchConditionDto condition = SearchConditionDto.from(searchRequest);
+        FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
-        PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
+        PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
 
         // then
         List<Steady> steadies = steadyRepository.findAll();
-        List<SteadySearchResponse> content = response.content();
+        List<SteadyQueryResponse> content = response.content();
         assertAll(
                 () -> assertThat(content).hasSameSizeAs(steadies),
-                () -> assertThat(content.get(0).createdAt()).isAfter(content.get(1).createdAt())
+                () -> assertThat(content.get(0).promotedAt()).isAfter(content.get(1).promotedAt())
         );
     }
 
@@ -185,23 +186,25 @@ class SteadyServiceTest {
         entityManager.clear();
 
         // when
-        SteadySearchRequest searchRequest = new SteadySearchRequest(null,
-                0,
+        SteadySearchRequest searchRequest = new SteadySearchRequest(
+                null,
                 "asc",
                 "deadline",
                 null,
                 null,
                 null,
                 null,
+                null,
+                null,
                 "false",
                 null);
-        SearchConditionDto condition = SearchConditionDto.from(searchRequest);
+        FilterConditionDto condition = FilterConditionDto.from(searchRequest);
         Pageable pageable = searchRequest.toPageable();
-        PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
+        PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
 
         // then
         List<Steady> steadies = steadyRepository.findAll();
-        List<SteadySearchResponse> content = response.content();
+        List<SteadyQueryResponse> content = response.content();
         assertAll(
                 () -> assertThat(content).hasSameSizeAs(steadies),
                 () -> assertThat(content.get(0).deadline()).isBefore(content.get(1).deadline())

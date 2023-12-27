@@ -4,13 +4,16 @@ import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
 import dev.steady.steady.dto.request.SteadySearchRequest;
+import dev.steady.steady.uitl.Cursor;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
-public record SearchConditionDto(
+public record FilterConditionDto(
+        Cursor cursor,
         SteadyType steadyType,
         SteadyMode steadyMode,
         List<String> stacks,
@@ -20,7 +23,8 @@ public record SearchConditionDto(
         String keyword
 ) {
 
-    public static SearchConditionDto from(SteadySearchRequest request) {
+    public static FilterConditionDto from(SteadySearchRequest request) {
+        Cursor cursor = filterCursor(request.criteria(), request.cursor());
         SteadyType steadyType = filterSteadyType(request.steadyType());
         SteadyMode steadyMode = filterSteadyModeCondition(request.steadyMode());
         List<String> stack = filterStackOrPositionCondition(request.stack());
@@ -28,13 +32,22 @@ public record SearchConditionDto(
         SteadyStatus status = filterSteadyStatusCondition(request.status());
         boolean like = filterLikeCondition(request.like());
 
-        return new SearchConditionDto(steadyType,
+        return new FilterConditionDto(
+                cursor,
+                steadyType,
                 steadyMode,
                 stack,
                 position,
                 status,
                 like,
                 request.keyword());
+    }
+
+    private static Cursor filterCursor(String criteria, String cursor) {
+        if (Objects.isNull(criteria)) {
+            criteria = "promotion.promotedAt";
+        }
+        return Cursor.of(criteria, cursor);
     }
 
     private static SteadyType filterSteadyType(String steadyType) {

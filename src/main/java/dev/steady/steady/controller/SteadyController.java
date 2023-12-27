@@ -4,7 +4,7 @@ import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.SteadyStatus;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
@@ -14,8 +14,8 @@ import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.steady.service.SteadyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -59,11 +59,11 @@ public class SteadyController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<PageResponse<SteadySearchResponse>> getSteadies(@Auth(required = false) UserInfo userInfo,
-                                                                          SteadySearchRequest request) {
-        SearchConditionDto condition = SearchConditionDto.from(request);
+    public ResponseEntity<PageResponse<SteadyQueryResponse>> getSteadies(@Auth(required = false) UserInfo userInfo,
+                                                                         SteadySearchRequest request) {
+        FilterConditionDto condition = FilterConditionDto.from(request);
         Pageable pageable = request.toPageable();
-        PageResponse<SteadySearchResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
+        PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
         return ResponseEntity.ok(response);
     }
 

@@ -17,7 +17,7 @@ import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.ViewCountLogRepository;
-import dev.steady.steady.dto.SearchConditionDto;
+import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
@@ -26,8 +26,8 @@ import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -35,7 +35,6 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -82,10 +81,9 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<SteadySearchResponse> getSteadies(UserInfo userInfo, SearchConditionDto conditionDto, Pageable pageable) {
-        Page<Steady> steadies = steadyRepository.findAllBySearchCondition(userInfo, conditionDto, pageable);
-        Page<SteadySearchResponse> searchResponses = steadies
-                .map(steady -> SteadySearchResponse.from(steady, getLikeCount(steady)));
+    public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
+        Page<Steady> steadies = steadyRepository.findAllByFilterCondition(userInfo, conditionDto, pageable);
+        Page<SteadyQueryResponse> searchResponses = steadies.map(SteadyQueryResponse::from);
         return PageResponse.from(searchResponses);
     }
 
@@ -239,17 +237,14 @@ public class SteadyService {
 
     private List<SteadyPosition> createSteadyPositions(List<Long> positions, Steady steady) {
         return IntStream.range(0, positions.size())
-                .mapToObj(index -> createSteadyPosition(positions, steady, index))
+                .mapToObj(index -> {
+                    Position position = positionRepository.getById(positions.get(index));
+                    return SteadyPosition.builder()
+                            .position(position)
+                            .steady(steady)
+                            .build();
+                })
                 .toList();
-    }
-
-    private SteadyPosition createSteadyPosition(List<Long> positions, Steady steady, int index) {
-        Position position = positionRepository.getById(positions.get(index));
-
-        return SteadyPosition.builder()
-                .position(position)
-                .steady(steady)
-                .build();
     }
 
     private List<SteadyQuestion> createSteadyQuestions(List<String> questions, Steady steady) {
@@ -260,10 +255,6 @@ public class SteadyService {
                         .steady(steady)
                         .build())
                 .toList();
-    }
-
-    private int getLikeCount(Steady steady) {
-        return steadyLikeRepository.countBySteady(steady);
     }
 
     private void updateSteadyPositions(Steady steady, List<Long> positions) {
