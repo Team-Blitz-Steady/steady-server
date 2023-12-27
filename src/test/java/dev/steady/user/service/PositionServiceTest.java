@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static dev.steady.user.fixture.UserFixtures.createPositions;
+import static dev.steady.user.fixture.UserFixturesV2.createPositions;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest

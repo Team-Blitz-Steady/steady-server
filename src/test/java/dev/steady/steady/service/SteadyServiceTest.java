@@ -52,16 +52,13 @@ import static dev.steady.global.auth.AuthFixture.createUserInfo;
 import static dev.steady.steady.domain.SteadyStatus.CLOSED;
 import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
-import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestion;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createOrderByDeadLineSteadySearchRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyQuestion;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyWithStatus;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyCreateRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyUpdateRequest;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createSecondUser;
-import static dev.steady.user.fixture.UserFixtures.createStack;
 import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
 import static dev.steady.user.fixture.UserFixturesV2.generateStack;
 import static dev.steady.user.fixture.UserFixturesV2.generateUser;
@@ -109,8 +106,8 @@ class SteadyServiceTest {
 
     @BeforeEach
     void setUp() {
-        position = positionRepository.save(createPosition());
-        stack = stackRepository.save(createStack());
+        position = positionRepository.save(generatePosition());
+        stack = stackRepository.save(generateStack());
         leader = userRepository.save(generateUser(position));
     }
 
@@ -321,7 +318,7 @@ class SteadyServiceTest {
         // given
         var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         List<String> questions = List.of("질문1", "질문2");
-        steadyQuestionRepository.saveAll(createSteadyQuestion(steady, questions));
+        steadyQuestionRepository.saveAll(createSteadyQuestion(steady, questions.size()));
         entityManager.flush();
         entityManager.clear();
 
@@ -342,7 +339,7 @@ class SteadyServiceTest {
         var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
 
-        var anotherUser = userRepository.save(createSecondUser(position));
+        var anotherUser = userRepository.save(generateUser(position));
         steady.addParticipantByLeader(leader, anotherUser);
         entityManager.flush();
         entityManager.clear();
@@ -626,10 +623,10 @@ class SteadyServiceTest {
     @Test
     void findMySteadiesTest() {
         //given
-        var steady = createSteady(leader, List.of(stack), RECRUITING);
-        var secondSteady = createSteady(leader, List.of(stack), CLOSED);
-        var thirdSteady = createSteady(leader, List.of(stack), FINISHED);
-        var steadies = steadyRepository.saveAll(List.of(steady, secondSteady, thirdSteady));
+        var steady = createSteadyWithStatus(leader, List.of(stack), RECRUITING);
+        var secondSteady = createSteadyWithStatus(leader, List.of(stack), CLOSED);
+        var thirdSteady = createSteadyWithStatus(leader, List.of(stack), FINISHED);
+        steadyRepository.saveAll(List.of(steady, secondSteady, thirdSteady));
         //when
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
         UserInfo userInfo = new UserInfo(leader.getId());

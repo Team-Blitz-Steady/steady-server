@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static dev.steady.user.fixture.UserFixtures.createStacks;
+import static dev.steady.user.fixture.UserFixturesV2.generateStacks;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -26,7 +26,7 @@ class StackServiceTest {
     @DisplayName("모든 스택을 가져올 수 있다.")
     void getStacksTest() {
         // given
-        List<Stack> stacks = createStacks();
+        List<Stack> stacks = generateStacks();
         stackRepository.saveAll(stacks);
 
         // when
