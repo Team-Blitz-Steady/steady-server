@@ -15,6 +15,7 @@ import dev.steady.global.auth.UserInfo;
 import dev.steady.global.exception.DuplicateException;
 import dev.steady.global.exception.ForbiddenException;
 import dev.steady.global.exception.NotFoundException;
+import dev.steady.notification.domain.Notification;
 import dev.steady.notification.domain.repository.NotificationRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.user.domain.Position;
@@ -29,10 +30,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import static dev.steady.application.domain.ApplicationStatus.ACCEPTED;
 import static dev.steady.application.domain.ApplicationStatus.REJECTED;
@@ -89,7 +98,8 @@ class ApplicationServiceTest {
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown() throws InterruptedException {
+        Thread.sleep(100);
         surveyResultRepository.deleteAll();
         notificationRepository.deleteAll();
         applicationRepository.deleteAll();
