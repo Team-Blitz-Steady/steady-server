@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.resourceDetails;
-import static dev.steady.user.fixture.UserFixturesV2.createPositionResponses;
+import static dev.steady.user.fixture.UserFixtures.createPositionResponses;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.JsonFieldType.NUMBER;

@@ -4,7 +4,6 @@ import dev.steady.steady.domain.ScheduledPeriod;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyPosition;
-import dev.steady.steady.domain.SteadyStack;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
 

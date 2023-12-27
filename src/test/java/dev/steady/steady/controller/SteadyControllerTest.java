@@ -8,6 +8,7 @@ import dev.steady.global.config.ControllerTestConfig;
 import dev.steady.steady.dto.FilterConditionDto;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
+import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
@@ -15,6 +16,7 @@ import dev.steady.steady.dto.response.SteadyQuestionsResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -24,16 +26,15 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.docume
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.resourceDetails;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createMySteadyResponse;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createParticipantsResponse;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyEntity;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyPageResponse;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyPosition;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyQuestionsResponse;
-import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyCreateRequest;
-import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyUpdateRequest;
-import static dev.steady.user.fixture.UserFixturesV2.generatePositionEntity;
+import static dev.steady.steady.fixture.SteadyFixtures.createMySteadyResponse;
+import static dev.steady.steady.fixture.SteadyFixtures.createParticipantsResponse;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyPageResponse;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyPosition;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestionsResponse;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyRequest;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyUpdateRequest;
+import static dev.steady.user.fixture.UserFixtures.createPosition;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -66,10 +67,12 @@ class SteadyControllerTest extends ControllerTestConfig {
     void createSteadyTest() throws Exception {
         // given
         var steadyId = 1L;
+        var stackId = 1L;
+        var positionId = 1L;
         var userId = 1L;
         var authentication = new Authentication(userId);
         var userInfo = createUserInfo(userId);
-        var steadyRequest = generateSteadyCreateRequest(1L, 1L);
+        var steadyRequest = createSteadyRequest(stackId, positionId);
 
         given(jwtResolver.getAuthentication(TOKEN)).willReturn(authentication);
         given(steadyService.create(steadyRequest, userInfo)).willReturn(steadyId);
@@ -152,12 +155,25 @@ class SteadyControllerTest extends ControllerTestConfig {
     @DisplayName("검색 조건에 따른 전체 조회 결과를 반환한다.")
     void getSteadiesByConditionTest() throws Exception {
         // given
-        var searchRequest = createDefaultSteadySearchRequest();
+        var searchRequest = new SteadySearchRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "false",
+                null);
+
         MultiValueMap params = new LinkedMultiValueMap<>() {{
-            add("steadyType", null);
             add("page", null);
             add("direction", null);
             add("criteria", null);
+            add("cursor", null);
+            add("steadyType", null);
             add("steadyMode", null);
             add("stack", null);
             add("position", null);
@@ -167,8 +183,7 @@ class SteadyControllerTest extends ControllerTestConfig {
         }};
 
         var pageable = searchRequest.toPageable();
-        var condition = FilterConditionDto.from(searchRequest);
-        var steady = createSteadyEntity();
+        var steady = createSteady();
         var response = createSteadyPageResponse(steady, pageable);
 
         given(steadyService.getSteadies(eq(new UserInfo(null)), any(FilterConditionDto.class), eq(pageable))).willReturn(response);
@@ -229,11 +244,11 @@ class SteadyControllerTest extends ControllerTestConfig {
         var authentication = new Authentication(userId);
         var userInfo = createUserInfo(userId);
 
-        var position = generatePositionEntity();
-        var steady = createSteadyEntity();
+        var steady = createSteady();
+        var position = createPosition();
         var steadyPosition = createSteadyPosition(steady, position);
-        var response = SteadyDetailResponse.of(
-                steady,
+        ReflectionTestUtils.setField(position, "id", 1L);
+        var response = SteadyDetailResponse.of(steady,
                 List.of(steadyPosition),
                 true,
                 1L,
@@ -337,9 +352,11 @@ class SteadyControllerTest extends ControllerTestConfig {
         // given
         var steadyId = 1L;
         var userId = 1L;
+        var stackId = 1L;
+        var positionId = 1L;
         var authentication = new Authentication(userId);
         var userInfo = createUserInfo(userId);
-        var request = generateSteadyUpdateRequest(1L, 1L);
+        var request = createSteadyUpdateRequest(stackId, positionId);
 
         given(jwtResolver.getAuthentication(TOKEN)).willReturn(authentication);
         willDoNothing().given(steadyService).updateSteady(steadyId, request, userInfo);

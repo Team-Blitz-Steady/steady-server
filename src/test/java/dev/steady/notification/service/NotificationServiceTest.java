@@ -35,10 +35,11 @@ import static dev.steady.notification.domain.NotificationMessage.getApplicationR
 import static dev.steady.notification.domain.NotificationMessage.getFreshApplicationMessage;
 import static dev.steady.notification.fixture.NotificationFixture.createApplicationResultNoti;
 import static dev.steady.notification.fixture.NotificationFixture.createFreshApplicationNoti;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
-import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
-import static dev.steady.user.fixture.UserFixturesV2.generateStack;
-import static dev.steady.user.fixture.UserFixturesV2.generateUser;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
+import static dev.steady.user.fixture.UserFixtures.createFirstUser;
+import static dev.steady.user.fixture.UserFixtures.createPosition;
+import static dev.steady.user.fixture.UserFixtures.createSecondUser;
+import static dev.steady.user.fixture.UserFixtures.createStack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -79,9 +80,9 @@ class NotificationServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.position = positionRepository.save(generatePosition());
-        this.leader = userRepository.save(generateUser(position));
-        this.stack = stackRepository.save(generateStack());
+        this.position = positionRepository.save(createPosition());
+        this.leader = userRepository.save(createFirstUser(position));
+        this.stack = stackRepository.save(createStack());
     }
 
     @AfterEach
@@ -99,7 +100,7 @@ class NotificationServiceTest {
     @DisplayName("새로운 신청서에 대한 알림을 생성할 수 있다.")
     void createNewApplicationNotificationTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var steady = steadyRepository.save(createSteady(leader, stack));
         var freshApplicationNoti = new FreshApplicationNotificationStrategy(steady);
 
         // when
@@ -117,8 +118,8 @@ class NotificationServiceTest {
     @DisplayName("신청서 결과에 대한 알림을 생성할 수 있다.")
     void createAcceptedApplicationNotificationTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var user = userRepository.save(generateUser(position));
+        var steady = steadyRepository.save(createSteady(leader, stack));
+        var user = userRepository.save(createSecondUser(position));
         var application = createApplication(user, steady);
         application.updateStatus(ApplicationStatus.ACCEPTED, leader);
         var applicationResultNoti = new ApplicationResultNotificationStrategy(application);
@@ -138,8 +139,8 @@ class NotificationServiceTest {
     @DisplayName("새로운 신청서가 등록되면 리더에게 새로운 신청 알림이 생성된다.")
     void createNotificationWhenCreateApplicationTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var user = userRepository.save(generateUser(position));
+        var steady = steadyRepository.save(createSteady(leader, stack));
+        var user = userRepository.save(createSecondUser(position));
         var surveyResultRequests = createSurveyResultRequests();
         var userInfo = createUserInfo(user.getId());
 
@@ -158,8 +159,8 @@ class NotificationServiceTest {
     @DisplayName("신청서가 거절 혹은 수락되면 유저에게 새로운 신청서 결과 알림이 생성된다.")
     void createNotificationWhenApplicationGotResultTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var user = userRepository.save(generateUser(position));
+        var steady = steadyRepository.save(createSteady(leader, stack));
+        var user = userRepository.save(createSecondUser(position));
         var application = applicationRepository.save(createApplication(user, steady));
         var userInfo = createUserInfo(leader.getId());
         var request = new ApplicationStatusUpdateRequest(ACCEPTED);
@@ -179,10 +180,10 @@ class NotificationServiceTest {
     @DisplayName("전체 알림을 가져올 수 있다.")
     void getNotificationsTest() {
         // given
-        var userInfo = createUserInfo(leader.getId());
-        steadyRepository.save(createSteady(leader, List.of(stack)));
-        notificationRepository.save(createFreshApplicationNoti(leader));
-        notificationRepository.save(createApplicationResultNoti(leader));
+        var user = userRepository.save(createSecondUser(position));
+        var userInfo = createUserInfo(user.getId());
+        notificationRepository.save(createFreshApplicationNoti(user));
+        notificationRepository.save(createApplicationResultNoti(user));
 
         // when
         NotificationsResponse notifications = notificationService.getNotifications(userInfo);
@@ -196,8 +197,9 @@ class NotificationServiceTest {
     @DisplayName("알림을 읽음 상태로 변경할 수 있다.")
     void readNotificaitonTest() {
         // given
-        var userInfo = createUserInfo(leader.getId());
-        var notification = notificationRepository.save(createFreshApplicationNoti(leader));
+        var user = userRepository.save(createSecondUser(position));
+        var userInfo = createUserInfo(user.getId());
+        var notification = notificationRepository.save(createFreshApplicationNoti(user));
 
         // when
         notificationService.readNotification(notification.getId(), userInfo);
@@ -211,7 +213,7 @@ class NotificationServiceTest {
     @DisplayName("모든 알림을 읽음 상태로 변경할 수 있다.")
     void readNotificaitonsTest() {
         // given
-        var user = userRepository.save(generateUser(position));
+        var user = userRepository.save(createSecondUser(position));
         var userInfo = createUserInfo(user.getId());
         notificationRepository.save(createFreshApplicationNoti(user));
         notificationRepository.save(createFreshApplicationNoti(user));
@@ -228,8 +230,9 @@ class NotificationServiceTest {
     @DisplayName("알림을 삭제할 수 있다.")
     void deleteNotificaitonTest() {
         // given
-        var userInfo = createUserInfo(leader.getId());
-        Notification notification = notificationRepository.save(createFreshApplicationNoti(leader));
+        var user = userRepository.save(createSecondUser(position));
+        var userInfo = createUserInfo(user.getId());
+        Notification notification = notificationRepository.save(createFreshApplicationNoti(user));
 
         // when
         notificationService.deleteNotification(notification.getId(), userInfo);
@@ -243,15 +246,16 @@ class NotificationServiceTest {
     @DisplayName("모든 알림을 삭제할 수 있다.")
     void deleteNotificaitonsTest() {
         // given
-        var userInfo = createUserInfo(leader.getId());
-        notificationRepository.save(createFreshApplicationNoti(leader));
-        notificationRepository.save(createFreshApplicationNoti(leader));
+        var user = userRepository.save(createSecondUser(position));
+        var userInfo = createUserInfo(user.getId());
+        notificationRepository.save(createFreshApplicationNoti(user));
+        notificationRepository.save(createFreshApplicationNoti(user));
 
         // when
         notificationService.deleteAll(userInfo);
 
         // then
-        assertThat(notificationRepository.findByReceiverId(leader.getId())).isEmpty();
+        assertThat(notificationRepository.findByReceiverId(user.getId())).isEmpty();
     }
 
 }

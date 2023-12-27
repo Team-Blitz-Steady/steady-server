@@ -109,10 +109,10 @@ public class Steady extends BaseEntity {
                    LocalDate deadline,
                    String title,
                    String content,
-                   User leader,
+                   User user,
                    List<Stack> stacks) {
         this.promotion = new Promotion();
-        this.participants = createParticipants(leader, participantLimit);
+        this.participants = createParticipants(user, participantLimit);
         this.numberOfParticipants = participants.getNumberOfParticipants();
         this.name = name;
         this.bio = bio;
@@ -129,7 +129,7 @@ public class Steady extends BaseEntity {
         this.steadyStacks = createSteadyStack(stacks);
     }
 
-    public void update(User leader,
+    public void update(User user,
                        String name,
                        String bio,
                        String contact,
@@ -137,12 +137,12 @@ public class Steady extends BaseEntity {
                        SteadyStatus status,
                        int participantLimit,
                        SteadyMode steadyMode,
-                       ScheduledPeriod scheduledPeriod,
+                       String scheduledPeriod,
                        LocalDate deadline,
                        String title,
                        String content,
                        List<Stack> stacks) {
-        validateLeader(leader);
+        validateLeader(user);
         this.name = name;
         this.bio = bio;
         this.contact = contact;
@@ -150,7 +150,7 @@ public class Steady extends BaseEntity {
         this.status = status;
         this.participants.updateParticipantLimit(participantLimit);
         this.steadyMode = steadyMode;
-        this.scheduledPeriod = scheduledPeriod;
+        this.scheduledPeriod = ScheduledPeriod.valueOf(scheduledPeriod);
         this.deadline = deadline;
         this.title = title;
         this.content = content;
@@ -158,8 +158,8 @@ public class Steady extends BaseEntity {
         this.steadyStacks.addAll(createSteadyStack(stacks));
     }
 
-    public void validateLeader(User leader) {
-        if (!isLeader(leader)) {
+    public void validateLeader(User user) {
+        if (!isLeader(user)) {
             throw new ForbiddenException(LEADER_PERMISSION_NEEDED);
         }
     }
@@ -184,13 +184,13 @@ public class Steady extends BaseEntity {
         numberOfParticipants = participants.getNumberOfParticipants();
     }
 
-    public void usePromotion(User leader) {
-        validateLeader(leader);
+    public void usePromotion(User user) {
+        validateLeader(user);
         promotion.use();
     }
 
-    public void finish(User leader) {
-        validateLeader(leader);
+    public void finish(User user) {
+        validateLeader(user);
         if (finishedAt != null) {
             throw new InvalidStateException(ALREADY_FINISHED);
         }
@@ -238,9 +238,9 @@ public class Steady extends BaseEntity {
         this.likeCount--;
     }
 
-    private Participants createParticipants(User leader, int participantLimit) {
+    private Participants createParticipants(User user, int participantLimit) {
         Participants participants = new Participants(participantLimit);
-        participants.add(Participant.createLeader(leader, this));
+        participants.add(Participant.createLeader(user, this));
         return participants;
     }
 

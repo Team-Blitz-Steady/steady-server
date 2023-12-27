@@ -38,13 +38,13 @@ import static dev.steady.review.fixture.ReviewFixture.createReview;
 import static dev.steady.review.fixture.ReviewFixture.createUserCard;
 import static dev.steady.steady.domain.Participant.createLeader;
 import static dev.steady.steady.domain.Participant.createMember;
-import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyWithStatus;
-import static dev.steady.user.fixture.UserFixturesV2.createUserUpdateRequest;
-import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
-import static dev.steady.user.fixture.UserFixturesV2.generateStack;
-import static dev.steady.user.fixture.UserFixturesV2.generateUser;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
+import static dev.steady.user.fixture.UserFixtures.createFirstUser;
+import static dev.steady.user.fixture.UserFixtures.createPosition;
+import static dev.steady.user.fixture.UserFixtures.createSecondUser;
+import static dev.steady.user.fixture.UserFixtures.createStack;
+import static dev.steady.user.fixture.UserFixtures.createUserUpdateRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -92,10 +92,10 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.position = positionRepository.save(generatePosition());
+        this.position = positionRepository.save(createPosition());
         this.stacks = stackRepository.saveAll(
                 IntStream.range(0, 3)
-                        .mapToObj(i -> generateStack())
+                        .mapToObj(i -> createStack())
                         .toList()
         );
     }
@@ -141,7 +141,7 @@ class UserServiceTest {
     @DisplayName("내 프로필을 조회할 수 있다.")
     void getMyUserDetail() {
         // given
-        var savedUser = userRepository.save(generateUser(position));
+        var savedUser = userRepository.save(createFirstUser(position));
         var userInfo = createUserInfo(savedUser.getId());
         var account = createAccount(savedUser);
         var savedAccount = accountRepository.save(account);
@@ -165,9 +165,9 @@ class UserServiceTest {
     @DisplayName("인증된 사용자의 정보를 수정할 수 있다.")
     void updateUser() {
         // given
-        var savedUser = userRepository.save(generateUser(position));
+        var savedUser = userRepository.save(createFirstUser(position));
         var userInfo = createUserInfo(savedUser.getId());
-        var newPosition = positionRepository.save(generatePosition());
+        var newPosition = positionRepository.save(createPosition());
         var stacksId = stacks.stream().map(Stack::getId).toList();
 
         var request = createUserUpdateRequest(newPosition.getId(), stacksId);
@@ -191,9 +191,9 @@ class UserServiceTest {
     @DisplayName("다른 사용자의 정보와 카드, 리뷰 코멘트를 조회할 수 있다. ")
     void getOtherUserDetail() {
         // given
-        var reviewerUser = userRepository.save(generateUser(position));
-        var revieweeUser = userRepository.save(generateUser(position));
-        var savedSteady = steadyRepository.save(createSteadyWithStatus(reviewerUser, stacks, FINISHED));
+        var reviewerUser = userRepository.save(createFirstUser(position));
+        var revieweeUser = userRepository.save(createSecondUser(position));
+        var savedSteady = steadyRepository.save(createSteady(reviewerUser, stacks, RECRUITING));
         var reviewer = participantRepository.save(createLeader(reviewerUser, savedSteady));
         var reviewee = participantRepository.save(createMember(revieweeUser, savedSteady));
 
@@ -234,8 +234,8 @@ class UserServiceTest {
 
         var userInfo = createUserInfo(user.getId());
 
-        var leader = userRepository.save(generateUser(position));
-        var steady = steadyRepository.save(createSteadyWithStatus(leader, stacks, RECRUITING));
+        var leader = userRepository.save(createFirstUser(position));
+        var steady = steadyRepository.save(createSteady(leader, stacks, RECRUITING));
         var reviewer = participantRepository.save(createLeader(leader, steady));
         var reviewee = participantRepository.save(createMember(user, steady));
 

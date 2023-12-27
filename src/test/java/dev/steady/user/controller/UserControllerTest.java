@@ -16,11 +16,11 @@ import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.resour
 import static dev.steady.auth.domain.Platform.KAKAO;
 import static dev.steady.auth.fixture.OAuthFixture.createAuthCodeRequestUrl;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
-import static dev.steady.user.fixture.UserFixturesV2.createProfileUploadUrlResponse;
-import static dev.steady.user.fixture.UserFixturesV2.createUserCreateRequest;
-import static dev.steady.user.fixture.UserFixturesV2.createUserMyDetailResponse;
-import static dev.steady.user.fixture.UserFixturesV2.createUserOtherDetailResponse;
-import static dev.steady.user.fixture.UserFixturesV2.createUserUpdateRequest;
+import static dev.steady.user.fixture.UserFixtures.createProfileUploadUrlResponse;
+import static dev.steady.user.fixture.UserFixtures.createUserCreateRequest;
+import static dev.steady.user.fixture.UserFixtures.createUserMyDetailResponse;
+import static dev.steady.user.fixture.UserFixtures.createUserOtherDetailResponse;
+import static dev.steady.user.fixture.UserFixtures.createUserUpdateRequest;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.when;

@@ -2,19 +2,17 @@ package dev.steady.steady.infrastructure;
 
 import dev.steady.global.config.JpaConfig;
 import dev.steady.global.config.QueryDslConfig;
+import dev.steady.steady.domain.repository.ParticipantRepository;
 import dev.steady.steady.domain.repository.SteadyPositionRepository;
 import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
-import dev.steady.user.domain.Position;
-import dev.steady.user.domain.Stack;
-import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +27,13 @@ import java.util.List;
 import static dev.steady.steady.domain.SteadyStatus.CLOSED;
 import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyPosition;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyQuestion;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyWithStatus;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createUnsatisfiedSteadySearchRequest;
-import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
-import static dev.steady.user.fixture.UserFixturesV2.generateStack;
-import static dev.steady.user.fixture.UserFixturesV2.generateUser;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyPosition;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestion;
+import static dev.steady.steady.fixture.SteadyFixtures.createSteadyRequest;
+import static dev.steady.user.fixture.UserFixtures.createFirstUser;
+import static dev.steady.user.fixture.UserFixtures.createPosition;
+import static dev.steady.user.fixture.UserFixtures.createStack;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -69,29 +65,38 @@ class SteadySearchRepositoryImplTest {
     @Autowired
     private SteadyQuestionRepository steadyQuestionRepository;
 
-    private Position position;
-    private Stack stack;
-    private User leader;
-
-    @BeforeEach
-    void setUp() {
-        position = positionRepository.save(generatePosition());
-        stack = stackRepository.save(generateStack());
-        leader = userRepository.save(generateUser(position));
-    }
+    @Autowired
+    private ParticipantRepository participantRepository;
 
     @Test
     @DisplayName("검색 조건에 해당하는 스테디를 조회할 수 있다.")
     void findAllByConditionTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        steadyPositionRepository.save(createSteadyPosition(steady, position));
-        steadyQuestionRepository.saveAll(createSteadyQuestion(steady, 3));
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steadyPosition = createSteadyPosition(steady, position);
+        steadyPositionRepository.save(steadyPosition);
+        var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
+        steadyQuestionRepository.saveAll(steadyQuestion);
         entityManager.flush();
         entityManager.clear();
 
         // when
-        var request = createDefaultSteadySearchRequest();
+        var request = new SteadySearchRequest(
+                null,
+                "DESC",
+                null,
+                null,
+                "study",
+                "online",
+                "Java",
+                "백엔드",
+                "recruiting",
+                "false",
+                "스테디");
 
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
@@ -110,14 +115,31 @@ class SteadySearchRepositoryImplTest {
     @DisplayName("검색 조건에 해당하지 않으면 스테디를 조회할 수 없다.")
     void findAllByConditionNotInTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        steadyPositionRepository.save(createSteadyPosition(steady, position));
-        steadyQuestionRepository.saveAll(createSteadyQuestion(steady, 3));
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steadyPosition = createSteadyPosition(steady, position);
+        steadyPositionRepository.save(steadyPosition);
+        var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
+        steadyQuestionRepository.saveAll(steadyQuestion);
         entityManager.flush();
         entityManager.clear();
 
         // when
-        var request = createUnsatisfiedSteadySearchRequest();
+        var request = new SteadySearchRequest(
+                null,
+                null,
+                null,
+                null,
+                "study",
+                "both",
+                "Java",
+                "데브옵스",
+                "finished",
+                "false",
+                "말도 안 되는 검색 조건!");
 
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
@@ -131,16 +153,31 @@ class SteadySearchRepositoryImplTest {
     @DisplayName("기본 조건은 전체 조회 결과를 반환한다.")
     void findAllByBasicConditionTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        steadyPositionRepository.save(createSteadyPosition(steady, position));
-        steadyQuestionRepository.saveAll(createSteadyQuestion(steady, 3));
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
+        var steadyPosition = createSteadyPosition(steady, position);
+        steadyPositionRepository.save(steadyPosition);
+        var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
+        steadyQuestionRepository.saveAll(steadyQuestion);
         entityManager.flush();
         entityManager.clear();
 
-
         // when
-        var request = createDefaultSteadySearchRequest();
-
+        var request = new SteadySearchRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "false",
+                null);
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
         var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
@@ -154,14 +191,16 @@ class SteadySearchRepositoryImplTest {
     @Test
     void findMyAllSteadies() {
         //given
-        var firstSteady = createSteadyWithStatus(leader, List.of(stack), RECRUITING);
-        var secondSteady = createSteadyWithStatus(leader, List.of(stack), CLOSED);
-        var thirdSteady = createSteadyWithStatus(leader, List.of(stack), FINISHED);
-        var steadies = steadyRepository.saveAll(List.of(firstSteady, secondSteady, thirdSteady));
-
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steady = createSteady(user, List.of(stack), RECRUITING);
+        var secondSteady = createSteady(user, List.of(stack), CLOSED);
+        var thirdSteady = createSteady(user, List.of(stack), FINISHED);
+        var steadies = steadyRepository.saveAll(List.of(steady, secondSteady, thirdSteady));
         //when
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
-        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(null, leader, pageRequest);
+        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(null, user, pageRequest);
         //then
         assertThat(mySteadies.hasNext()).isFalse();
         assertThat(mySteadies.getNumberOfElements()).isEqualTo(steadies.size());
@@ -171,13 +210,16 @@ class SteadySearchRepositoryImplTest {
     @Test
     void findMyFinishedSteadies() {
         //given
-        var firstSteady = createSteadyWithStatus(leader, List.of(stack), RECRUITING);
-        var secondSteady = createSteadyWithStatus(leader, List.of(stack), CLOSED);
-        var thirdSteady = createSteadyWithStatus(leader, List.of(stack), FINISHED);
-        steadyRepository.saveAll(List.of(firstSteady, secondSteady, thirdSteady));
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steady = createSteady(user, List.of(stack), RECRUITING);
+        var secondSteady = createSteady(user, List.of(stack), CLOSED);
+        var thirdSteady = createSteady(user, List.of(stack), FINISHED);
+        var steadies = steadyRepository.saveAll(List.of(steady, secondSteady, thirdSteady));
         //when
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
-        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(FINISHED, leader, pageRequest);
+        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(FINISHED, user, pageRequest);
         //then
         assertThat(mySteadies.hasNext()).isFalse();
         assertThat(mySteadies.getNumberOfElements()).isOne();
@@ -187,13 +229,16 @@ class SteadySearchRepositoryImplTest {
     @Test
     void findMyNotFinishedSteadies() {
         //given
-        var firstSteady = createSteadyWithStatus(leader, List.of(stack), RECRUITING);
-        var secondSteady = createSteadyWithStatus(leader, List.of(stack), CLOSED);
-        var thirdSteady = createSteadyWithStatus(leader, List.of(stack), FINISHED);
-        steadyRepository.saveAll(List.of(firstSteady, secondSteady, thirdSteady));
+        var position = positionRepository.save(createPosition());
+        var user = userRepository.save(createFirstUser(position));
+        var stack = stackRepository.save(createStack());
+        var steady = createSteady(user, List.of(stack), RECRUITING);
+        var secondSteady = createSteady(user, List.of(stack), CLOSED);
+        var thirdSteady = createSteady(user, List.of(stack), FINISHED);
+        var steadies = steadyRepository.saveAll(List.of(steady, secondSteady, thirdSteady));
         //when
         PageRequest pageRequest = PageRequest.of(0, 10, Sort.Direction.DESC, "createdAt");
-        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(RECRUITING, leader, pageRequest);
+        Slice<MySteadyQueryResponse> mySteadies = queryDslRepository.findMySteadies(RECRUITING, user, pageRequest);
         //then
         assertThat(mySteadies.hasNext()).isFalse();
         assertThat(mySteadies.getNumberOfElements()).isEqualTo(2);
