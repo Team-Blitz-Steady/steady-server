@@ -90,8 +90,8 @@ class ApplicationServiceTest {
 
     @AfterEach
     void tearDown() {
-        notificationRepository.deleteAll();
         surveyResultRepository.deleteAll();
+        notificationRepository.deleteAll();
         applicationRepository.deleteAll();
         steadyRepository.deleteAll();
         userRepository.deleteAll();
