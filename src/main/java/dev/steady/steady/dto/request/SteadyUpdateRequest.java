@@ -1,5 +1,6 @@
 package dev.steady.steady.dto.request;
 
+import dev.steady.steady.domain.ScheduledPeriod;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
@@ -30,7 +31,7 @@ public record SteadyUpdateRequest(
         @NotNull(message = "NULL은 올 수 없습니다.")
         SteadyMode steadyMode,
         @NotNull(message = "NULL은 올 수 없습니다.")
-        String scheduledPeriod,
+        ScheduledPeriod scheduledPeriod,
         @FutureOrPresent(message = "마감 종료일은 오늘 이후로 설정해야합니다.")
         LocalDate deadline,
         @Size(min = 2, max = 25, message = "모집글 제목은 2글자 이상 25글자 이하입니다.")

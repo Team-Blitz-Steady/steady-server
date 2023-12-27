@@ -22,7 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyEntity;
 
 public class ReviewFixture {
 
@@ -101,7 +101,7 @@ public class ReviewFixture {
     }
 
     public static ReviewInfoResponse createReviewInfoResponse() {
-        Steady steady = createSteady();
+        Steady steady = createSteadyEntity();
         LocalDate finishedAt = LocalDate.of(2023, 12, 2);
         ReviewSteadyResponse reviewSteadyResponse = ReviewSteadyResponse.builder()
                 .steadyId(steady.getId())

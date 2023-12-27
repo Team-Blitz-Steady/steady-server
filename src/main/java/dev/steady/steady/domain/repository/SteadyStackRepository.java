@@ -9,4 +9,6 @@ public interface SteadyStackRepository extends JpaRepository<SteadyStack, Long> 
 
     List<SteadyStack> findBySteadyId(Long id);
 
+    void deleteBySteadyId(Long steadyId);
+
 }

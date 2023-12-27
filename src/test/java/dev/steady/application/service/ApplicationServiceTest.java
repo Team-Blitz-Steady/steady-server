@@ -41,12 +41,10 @@ import static dev.steady.application.fixture.ApplicationFixture.createSurveyResu
 import static dev.steady.application.fixture.SurveyResultFixture.createAnswers;
 import static dev.steady.application.fixture.SurveyResultFixture.createSurveyResultRequests;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createSecondUser;
-import static dev.steady.user.fixture.UserFixtures.createStack;
-import static dev.steady.user.fixture.UserFixtures.createThirdUser;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateStack;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -85,9 +83,9 @@ class ApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        this.position = positionRepository.save(createPosition());
-        this.leader = userRepository.save(createFirstUser(position));
-        this.stack = stackRepository.save(createStack());
+        this.position = positionRepository.save(generatePosition());
+        this.leader = userRepository.save(generateUser(position));
+        this.stack = stackRepository.save(generateStack());
     }
 
     @AfterEach
@@ -105,7 +103,7 @@ class ApplicationServiceTest {
     @Test
     void createApplicationTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var surveyResultRequests = createSurveyResultRequests();
         var otherUser = userRepository.save(createSecondUser(position));
         var userInfo = createUserInfo(otherUser.getId());
@@ -162,9 +160,9 @@ class ApplicationServiceTest {
     @Test
     void getApplicationsTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
-        var thirdUser = userRepository.save(createThirdUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
+        var thirdUser = userRepository.save(generateUser(position));
         applicationRepository.saveAll(List.of(createApplication(secondUser, steady),
                 createApplication(thirdUser, steady)));
         //when
@@ -177,16 +175,16 @@ class ApplicationServiceTest {
                 () -> assertThat(response.hasNext()).isFalse(),
                 () -> assertThat(response.content()).hasSize(2)
                         .extracting(ApplicationSummaryResponse::nickname)
-                        .containsExactly("Jun", "Young"));
+                        .containsExactly(secondUser.getNickname(), thirdUser.getNickname()));
     }
 
     @DisplayName("스터디 리더가 아니면 신청서 목록 조회를 할 수 없다.")
     @Test
     void getApplicationsFailTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
-        var thirdUser = userRepository.save(createThirdUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
+        var thirdUser = userRepository.save(generateUser(position));
         applicationRepository.save(createApplication(secondUser, steady));
         var userInfo = createUserInfo(thirdUser.getId());
         var pageRequest = PageRequest.of(0, 10);
@@ -202,8 +200,8 @@ class ApplicationServiceTest {
     @Test
     void getApplicationDetailTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = applicationRepository.save(createApplication(secondUser, steady));
         surveyResultRepository.saveAll(createSurveyResults(application));
         var userInfo = createUserInfo(leader.getId());
@@ -223,9 +221,9 @@ class ApplicationServiceTest {
     @Test
     void getApplicationDetailFailTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
-        var thirdUser = userRepository.save(createThirdUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
+        var thirdUser = userRepository.save(generateUser(position));
         var application = applicationRepository.save(createApplication(secondUser, steady));
         var userInfo = createUserInfo(thirdUser.getId());
         //when
@@ -238,8 +236,8 @@ class ApplicationServiceTest {
     @Test
     void createSurveyResultTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = applicationRepository.save(createApplication(secondUser, steady));
         var userInfo = createUserInfo(leader.getId());
         var request = new ApplicationStatusUpdateRequest(ACCEPTED);
@@ -255,8 +253,8 @@ class ApplicationServiceTest {
     @Test
     void createSurveyResultFailTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var entity = createApplication(secondUser, steady);
         ReflectionTestUtils.setField(entity, "status", REJECTED);
         var application = applicationRepository.save(entity);
@@ -273,8 +271,8 @@ class ApplicationServiceTest {
     @Test
     void updateApplicationAnswerTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = createApplication(secondUser, steady);
         var savedApplication = applicationRepository.save(application);
         surveyResultRepository.saveAll(createSurveyResults(savedApplication));
@@ -296,8 +294,8 @@ class ApplicationServiceTest {
     @Test
     void updateApplicationAnswerTest2() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = createApplication(secondUser, steady);
         var savedApplication = applicationRepository.save(application);
         surveyResultRepository.saveAll(createSurveyResults(savedApplication));
@@ -314,8 +312,8 @@ class ApplicationServiceTest {
     @DisplayName("신청자는 본인이 신청한 신청서 리스트를 조회할 수 있다.")
     @Test
     void getMyApplications() {
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = createApplication(secondUser, steady);
         var savedApplication = applicationRepository.save(application);
         var userInfo = new UserInfo(secondUser.getId());
@@ -332,8 +330,8 @@ class ApplicationServiceTest {
     @DisplayName("본인의 신청서를 삭제할 수 있고 등록된 질답도 함께 삭제된다.")
     @Test
     void deleteApplication() {
-        var steady = steadyRepository.save(createSteady(leader, stack));
-        var secondUser = userRepository.save(createSecondUser(position));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var secondUser = userRepository.save(generateUser(position));
         var application = createApplication(secondUser, steady);
         var savedApplication = applicationRepository.save(application);
         var userInfo = new UserInfo(secondUser.getId());
