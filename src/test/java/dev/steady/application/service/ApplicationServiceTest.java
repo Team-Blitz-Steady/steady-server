@@ -105,7 +105,7 @@ class ApplicationServiceTest {
         //given
         var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var surveyResultRequests = createSurveyResultRequests();
-        var otherUser = userRepository.save(createSecondUser(position));
+        var otherUser = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(otherUser.getId());
 
         //when
@@ -121,9 +121,9 @@ class ApplicationServiceTest {
     @Test
     void duplicateApplicationTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var surveyResultRequests = createSurveyResultRequests();
-        var otherUser = userRepository.save(createSecondUser(position));
+        var otherUser = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(otherUser.getId());
 
         //when
@@ -143,7 +143,7 @@ class ApplicationServiceTest {
     @Test
     void leaderSubmissionTest() {
         //given
-        var steady = steadyRepository.save(createSteady(leader, stack));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var surveyResultRequests = createSurveyResultRequests();
         var userInfo = createUserInfo(leader.getId());
 

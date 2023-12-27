@@ -213,8 +213,8 @@ public class Steady extends BaseEntity {
         return participants.getParticipantLimit();
     }
 
-    public boolean isDeletable(User user) {
-        validateLeader(user);
+    public boolean isDeletable(User leader) {
+        validateLeader(leader);
         return numberOfParticipants == 1;
     }
 
