@@ -21,6 +21,8 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
 
     Slice<Application> findAllByUser(User user, Pageable pageable);
 
+    Optional<Application> findBySteadyIdAndUserId(Long steadyId, Long userId);
+
     Optional<Application> findBySteadyIdAndUserIdAndStatus(Long steadyId, Long userId, ApplicationStatus status);
 
     Slice<Application> findAllBySteadyIdAndStatus(Long steadyId, ApplicationStatus status, Pageable pageable);

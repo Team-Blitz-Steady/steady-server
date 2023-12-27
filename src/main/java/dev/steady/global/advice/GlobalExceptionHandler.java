@@ -2,6 +2,8 @@ package dev.steady.global.advice;
 
 import dev.steady.auth.exception.OAuthPlatformException;
 import dev.steady.global.exception.AuthenticationException;
+import dev.steady.global.exception.BusinessException;
+import dev.steady.global.exception.DuplicateException;
 import dev.steady.global.exception.ErrorCode;
 import dev.steady.global.exception.ForbiddenException;
 import dev.steady.global.exception.GlobalErrorCode;
@@ -18,6 +20,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @Slf4j
@@ -29,6 +32,14 @@ public class GlobalExceptionHandler {
         log.info("예상치 못한 서버 예외 발생", e);
         return ResponseEntity.status(INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(GlobalErrorCode.INTERNAL_SERVER_ERROR));
+    }
+
+    @ExceptionHandler({InvalidStateException.class, InvalidValueException.class, DuplicateException.class})
+    public ResponseEntity<ErrorResponse> handlerException(BusinessException exception) {
+        ErrorCode errorCode = exception.getErrorCode();
+        log.info(errorCode.message(), exception);
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(exception.getErrorCode()));
     }
 
     @ExceptionHandler
@@ -51,25 +62,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlerException(NotFoundException exception) {
         ErrorCode errorCode = exception.getErrorCode();
         log.info(errorCode.message(), exception);
-        return ResponseEntity.badRequest()
+        return ResponseEntity.status(NOT_FOUND)
                 .body(ErrorResponse.of(exception.getErrorCode()));
     }
 
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handlerException(InvalidStateException exception) {
-        ErrorCode errorCode = exception.getErrorCode();
-        log.info(errorCode.message(), exception);
-        return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(exception.getErrorCode()));
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handlerException(InvalidValueException exception) {
-        ErrorCode errorCode = exception.getErrorCode();
-        log.info(errorCode.message(), exception);
-        return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(exception.getErrorCode()));
-    }
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handlerException(OAuthPlatformException exception) {

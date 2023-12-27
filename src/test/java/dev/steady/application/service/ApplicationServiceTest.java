@@ -12,6 +12,7 @@ import dev.steady.application.dto.response.CreateApplicationResponse;
 import dev.steady.application.dto.response.MyApplicationSummaryResponse;
 import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
+import dev.steady.global.exception.DuplicateException;
 import dev.steady.global.exception.ForbiddenException;
 import dev.steady.global.exception.NotFoundException;
 import dev.steady.notification.domain.repository.NotificationRepository;
@@ -104,7 +105,8 @@ class ApplicationServiceTest {
         //given
         var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var surveyResultRequests = createSurveyResultRequests();
-        var userInfo = createUserInfo(leader.getId());
+        var otherUser = userRepository.save(generateUser(position));
+        var userInfo = createUserInfo(otherUser.getId());
 
         //when
         CreateApplicationResponse response = applicationService.createApplication(steady.getId(),
@@ -113,6 +115,45 @@ class ApplicationServiceTest {
 
         //then
         assertThat(response.applicationId()).isNotNull();
+    }
+
+    @DisplayName("신청서를 중복으로 제출하면 중복 예외가 발생한다")
+    @Test
+    void duplicateApplicationTest() {
+        //given
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var surveyResultRequests = createSurveyResultRequests();
+        var otherUser = userRepository.save(generateUser(position));
+        var userInfo = createUserInfo(otherUser.getId());
+
+        //when
+        applicationService.createApplication(steady.getId(),
+                surveyResultRequests,
+                userInfo);
+
+        //then
+        assertThatThrownBy(
+                () -> applicationService.createApplication(steady.getId(),
+                        surveyResultRequests,
+                        userInfo)
+        ).isInstanceOf(DuplicateException.class);
+    }
+
+    @DisplayName("모집글 작성자가 신청서를 제출하면 예외가 발생한다")
+    @Test
+    void leaderSubmissionTest() {
+        //given
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
+        var surveyResultRequests = createSurveyResultRequests();
+        var userInfo = createUserInfo(leader.getId());
+
+        //when
+        //then
+        assertThatThrownBy(
+                () -> applicationService.createApplication(steady.getId(),
+                        surveyResultRequests,
+                        userInfo)
+        ).isInstanceOf(ForbiddenException.class);
     }
 
     @DisplayName("스터디 리더는 신청서 목록 조회를 할 수 있다.")
