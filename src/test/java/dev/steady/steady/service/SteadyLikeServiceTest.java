@@ -18,10 +18,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createStack;
+import java.util.List;
+
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateStack;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -43,12 +45,12 @@ class SteadyLikeServiceTest {
     private StackRepository stackRepository;
 
     private Position position;
-    private User user;
+    private User leader;
 
     @BeforeEach
     void setUp() {
-        this.position = positionRepository.save(createPosition());
-        this.user = userRepository.save(createFirstUser(position));
+        this.position = positionRepository.save(generatePosition());
+        this.leader = userRepository.save(generateUser(position));
     }
 
     @AfterEach
@@ -64,11 +66,11 @@ class SteadyLikeServiceTest {
     @Test
     void updateSteadyLikeTest() {
         //given
-        Stack stack = stackRepository.save(createStack());
-        Steady steady = steadyRepository.save(createSteady(user, stack));
+        Stack stack = stackRepository.save(generateStack());
+        Steady steady = steadyRepository.save(createSteady(leader, List.of(stack)));
 
         //when
-        SteadyLikeResponse response = steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(user.getId()));
+        SteadyLikeResponse response = steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(leader.getId()));
 
         //then
         assertAll(
@@ -81,12 +83,12 @@ class SteadyLikeServiceTest {
     @Test
     void updateSteadyLikeToggleTest() {
         //given
-        Stack stack = stackRepository.save(createStack());
-        Steady steady = steadyRepository.save(createSteady(user, stack));
+        Stack stack = stackRepository.save(generateStack());
+        Steady steady = steadyRepository.save(createSteady(leader, List.of(stack)));
 
         //when
-        steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(user.getId()));
-        SteadyLikeResponse response = steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(user.getId()));
+        steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(leader.getId()));
+        SteadyLikeResponse response = steadyLikeService.updateSteadyLike(steady.getId(), new UserInfo(leader.getId()));
 
         //then
         assertAll(
