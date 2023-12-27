@@ -48,24 +48,6 @@ public class SteadyFixturesV2 {
                 .create();
     }
 
-    public static SteadyCreateRequest createSteadyRequest(Long stackId, Long positionId) {
-        return SteadyCreateRequest.builder()
-                .name("테스트 스테디")
-                .bio("스테디 소개")
-                .contact("geonhee33@gmail.com")
-                .type(STUDY)
-                .participantLimit(6)
-                .steadyMode(ONLINE)
-                .scheduledPeriod(ONE_WEEK)
-                .deadline(LocalDate.now())
-                .title("스테디 제목")
-                .content("모집글 내용")
-                .positions(List.of(positionId))
-                .stacks(List.of(stackId))
-                .questions(List.of("1번 질문", "2번 질문", "3번 질문"))
-                .build();
-    }
-
     public static SteadyUpdateRequest generateSteadyUpdateRequest(Long stackId, Long positionId) {
         return Instancio.of(SteadyUpdateRequest.class)
                 .generate(field(SteadyUpdateRequest::name), gen -> gen.string().prefix("스테디 이름"))
