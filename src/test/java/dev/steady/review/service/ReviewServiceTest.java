@@ -40,12 +40,10 @@ import static dev.steady.review.fixture.ReviewFixture.createReviewCreateRequest;
 import static dev.steady.review.fixture.ReviewFixture.createUserCard;
 import static dev.steady.steady.domain.Participant.createMember;
 import static dev.steady.steady.domain.SteadyStatus.FINISHED;
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createSecondUser;
-import static dev.steady.user.fixture.UserFixtures.createStack;
-import static dev.steady.user.fixture.UserFixtures.createThirdUser;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyWithStatus;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateStack;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -79,13 +77,13 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        var position = positionRepository.save(createPosition());
-        this.leader = userRepository.save(createFirstUser(position));
-        this.reviewerUser = userRepository.save(createSecondUser(position));
-        this.revieweeUser = userRepository.save(createThirdUser(position));
+        var position = positionRepository.save(generatePosition());
+        this.leader = userRepository.save(generateUser(position));
+        this.reviewerUser = userRepository.save(generateUser(position));
+        this.revieweeUser = userRepository.save(generateUser(position));
         this.stacks = stackRepository.saveAll(
                 IntStream.range(0, 3)
-                        .mapToObj(i -> createStack())
+                        .mapToObj(i -> generateStack())
                         .toList()
         );
     }
@@ -108,7 +106,7 @@ class ReviewServiceTest {
         // given
         var userInfo = createUserInfo(reviewerUser.getId());
 
-        var steady = createSteady(leader, stacks, FINISHED);
+        var steady = createSteadyWithStatus(leader, stacks, FINISHED);
         ReflectionTestUtils.setField(steady, "finishedAt", LocalDate.now());
         var savedSteady = steadyRepository.save(steady);
 
@@ -137,7 +135,7 @@ class ReviewServiceTest {
     void createReviewAfterReviewEnabledPeriodTest() {
         // given
         var userInfo = createUserInfo(reviewerUser.getId());
-        var steady = createSteady(leader, stacks, FINISHED);
+        var steady = createSteadyWithStatus(leader, stacks, FINISHED);
         var finishedAt = LocalDate.now().minusMonths(3);
         ReflectionTestUtils.setField(steady, "finishedAt", finishedAt);
         var savedSteady = steadyRepository.save(steady);
@@ -164,7 +162,7 @@ class ReviewServiceTest {
                 .toList();
         List<Card> savedCards = cardRepository.saveAll(cards);
 
-        var steady = steadyRepository.save(createSteady(reviewerUser, stacks, FINISHED));
+        var steady = steadyRepository.save(createSteadyWithStatus(reviewerUser, stacks, FINISHED));
         var reviewee = participantRepository.save(createMember(revieweeUser, steady));
 
         // when
@@ -189,7 +187,7 @@ class ReviewServiceTest {
     void switchReviewIsPublicTest() {
         // given
         var userInfo = createUserInfo(revieweeUser.getId());
-        var steady = steadyRepository.save(createSteady(leader, stacks, FINISHED));
+        var steady = steadyRepository.save(createSteadyWithStatus(leader, stacks, FINISHED));
         var reviewer = participantRepository.save(createMember(reviewerUser, steady));
         var reviewee = participantRepository.save(createMember(revieweeUser, steady));
         var review = reviewRepository.save(createReview(reviewer, reviewee, steady));
@@ -207,7 +205,7 @@ class ReviewServiceTest {
     void getMyReviewsTest() {
         // given
         var userInfo = createUserInfo(revieweeUser.getId());
-        var steady = steadyRepository.save(createSteady(leader, stacks, FINISHED));
+        var steady = steadyRepository.save(createSteadyWithStatus(leader, stacks, FINISHED));
         var reviewer = participantRepository.save(createMember(reviewerUser, steady));
         var reviewee = participantRepository.save(createMember(revieweeUser, steady));
         var review = reviewRepository.save(createReview(reviewer, reviewee, steady));
@@ -233,7 +231,7 @@ class ReviewServiceTest {
         // given
         var userInfo = createUserInfo(reviewerUser.getId());
 
-        var steady = createSteady(leader, stacks, FINISHED);
+        var steady = createSteadyWithStatus(leader, stacks, FINISHED);
         var finishedAt = LocalDate.now();
         var reviewDeadline = finishedAt.plusMonths(2L);
 
