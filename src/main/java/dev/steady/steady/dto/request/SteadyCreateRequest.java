@@ -4,6 +4,7 @@ import dev.steady.steady.domain.ScheduledPeriod;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyMode;
 import dev.steady.steady.domain.SteadyType;
+import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -45,7 +46,7 @@ public record SteadyCreateRequest(
         List<String> questions
 ) {
 
-    public Steady toEntity(User leader) {
+    public Steady toEntity(User leader, List<Stack> stacks) {
         return Steady.builder()
                 .name(name)
                 .bio(bio)
@@ -58,6 +59,7 @@ public record SteadyCreateRequest(
                 .title(title)
                 .content(content)
                 .leader(leader)
+                .stacks(stacks)
                 .build();
     }
 
