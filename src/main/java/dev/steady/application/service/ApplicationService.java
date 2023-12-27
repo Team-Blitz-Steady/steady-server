@@ -38,7 +38,6 @@ import static dev.steady.application.domain.ApplicationStatus.ACCEPTED;
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
 import static dev.steady.application.exception.ApplicationErrorCode.APPLICATION_DUPLICATION;
 import static dev.steady.application.exception.ApplicationErrorCode.STEADY_LEADER_SUBMISSION;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
