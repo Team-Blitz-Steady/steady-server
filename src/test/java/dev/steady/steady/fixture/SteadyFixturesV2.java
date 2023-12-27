@@ -9,9 +9,9 @@ import dev.steady.steady.dto.request.SteadyUpdateRequest;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
+import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
-import dev.steady.steady.dto.response.SteadySearchResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -30,6 +30,7 @@ import static dev.steady.steady.domain.ScheduledPeriod.FIVE_MONTH;
 import static dev.steady.steady.domain.ScheduledPeriod.ONE_WEEK;
 import static dev.steady.steady.domain.SteadyMode.ONLINE;
 import static dev.steady.steady.domain.SteadyType.STUDY;
+import static dev.steady.user.fixture.UserFixturesV2.generateStackEntity;
 import static org.instancio.Select.field;
 
 public class SteadyFixturesV2 {
@@ -78,7 +79,7 @@ public class SteadyFixturesV2 {
                 .create();
     }
 
-    public static Steady createSteady(User leader) {
+    public static Steady createSteady(User leader, List<Stack> stacks) {
         return Steady.builder()
                 .name("테스트 스테디")
                 .bio("우리 스터디는 정말 열심히 합니다.")
@@ -91,12 +92,13 @@ public class SteadyFixturesV2 {
                 .title("스테디 제목")
                 .content("스테디 본문")
                 .leader(leader)
+                .stacks(stacks)
                 .build();
     }
 
     public static Steady createSteadyEntity() {
         var leader = UserFixturesV2.generateUserEntity();
-        var steady = createSteady(leader);
+        var steady = createSteady(leader, List.of(generateStackEntity()));
         ReflectionTestUtils.setField(steady, "id", 1L);
         ReflectionTestUtils.setField(steady, "createdAt", LocalDateTime.of(2025, 12, 7, 11, 12));
         return steady;
@@ -120,6 +122,7 @@ public class SteadyFixturesV2 {
                 null,
                 null,
                 null,
+                null,
                 "false",
                 null);
     }
@@ -127,9 +130,10 @@ public class SteadyFixturesV2 {
     public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
         return new SteadySearchRequest(
                 null,
-                null,
                 "asc",
                 "deadline",
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -138,9 +142,9 @@ public class SteadyFixturesV2 {
                 null);
     }
 
-    public static PageResponse<SteadySearchResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
+    public static PageResponse<SteadyQueryResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
         Page<Steady> steadies = new PageImpl<>(List.of(steady), pageable, 1);
-        return PageResponse.from(steadies.map(v -> SteadySearchResponse.from(v, 0)));
+        return PageResponse.from(steadies.map(SteadyQueryResponse::from));
     }
 
     public static SteadyQuestionsResponse createSteadyQuestionsResponse() {

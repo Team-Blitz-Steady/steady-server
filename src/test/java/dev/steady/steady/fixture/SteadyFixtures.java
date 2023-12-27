@@ -109,6 +109,7 @@ public class SteadyFixtures {
                 .title("title")
                 .content("content")
                 .leader(leader)
+                .stacks(List.of(stack))
                 .steadyMode(ONLINE)
                 .build();
     }
@@ -134,7 +135,7 @@ public class SteadyFixtures {
     public static Steady createSteady() {
         var user = UserFixtures.createFirstUser(UserFixtures.createPosition());
         var stack = UserFixtures.createStack();
-        var steady = createSteadyRequest(1L, 1L).toEntity(user);
+        var steady = createSteadyRequest(1L, 1L).toEntity(user, List.of(stack));
         ReflectionTestUtils.setField(user, "id", 1L);
         ReflectionTestUtils.setField(stack, "id", 1L);
         ReflectionTestUtils.setField(steady, "id", 1L);
@@ -154,6 +155,7 @@ public class SteadyFixtures {
                 .deadline(LocalDate.of(2023, 12, 20))
                 .title("게시글 제목")
                 .content("내용")
+                .stacks(stacks)
                 .leader(leader)
                 .build();
         ReflectionTestUtils.setField(steady, "status", status);

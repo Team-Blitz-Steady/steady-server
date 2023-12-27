@@ -65,9 +65,6 @@ class SteadySearchRepositoryImplTest {
     @Autowired
     private SteadyQuestionRepository steadyQuestionRepository;
 
-    @Autowired
-    private ParticipantRepository participantRepository;
-
     @Test
     @DisplayName("검색 조건에 해당하는 스테디를 조회할 수 있다.")
     void findAllByConditionTest() {
@@ -76,7 +73,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
@@ -119,7 +116,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());
@@ -157,7 +154,7 @@ class SteadySearchRepositoryImplTest {
         var user = userRepository.save(createFirstUser(position));
         var stack = stackRepository.save(createStack());
         var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
-        var steady = steadyRepository.save(steadyRequest.toEntity(user));
+        var steady = steadyRepository.save(steadyRequest.toEntity(user, List.of(stack)));
         var steadyPosition = createSteadyPosition(steady, position);
         steadyPositionRepository.save(steadyPosition);
         var steadyQuestion = createSteadyQuestion(steady, steadyRequest.questions());

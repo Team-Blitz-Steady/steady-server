@@ -27,6 +27,8 @@ import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.user.domain.Position;
+import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
@@ -50,13 +52,11 @@ import static dev.steady.global.auth.AuthFixture.createUserInfo;
 import static dev.steady.steady.domain.SteadyStatus.CLOSED;
 import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
-import static dev.steady.steady.fixture.SteadyFixtures.createAnotherSteadyRequest;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
 import static dev.steady.steady.fixture.SteadyFixtures.createSteadyQuestion;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createOrderByDeadLineSteadySearchRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
-import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyCreateRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyUpdateRequest;
 import static dev.steady.user.fixture.UserFixtures.createPosition;
@@ -175,7 +175,7 @@ class SteadyServiceTest {
         // given
         var userInfo = createUserInfo(leader.getId());
 
-        var steadyRequest = createSteadyRequest(stack.getId(), position.getId());
+        var steadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
         var anotherSteadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
         steadyService.create(steadyRequest, userInfo);
         steadyService.create(anotherSteadyRequest, userInfo);
@@ -230,7 +230,7 @@ class SteadyServiceTest {
         var anotherUser = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(anotherUser.getId());
 
-        var steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
         entityManager.flush();
         entityManager.clear();
@@ -257,7 +257,7 @@ class SteadyServiceTest {
         var otherUser = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(otherUser.getId());
 
-        var steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
         entityManager.flush();
         entityManager.clear();
@@ -276,7 +276,7 @@ class SteadyServiceTest {
         var otherUser = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(otherUser.getId());
 
-        var steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
         entityManager.flush();
         entityManager.clear();
@@ -295,7 +295,7 @@ class SteadyServiceTest {
         // given
         var userInfo = new UserInfo(null);
 
-        var steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
         entityManager.flush();
         entityManager.clear();
@@ -319,7 +319,7 @@ class SteadyServiceTest {
     @DisplayName("스테디 식별자를 통해 스테디 질문을 조회할 수 있다.")
     void getSteadyQuestionsTest() {
         // given
-        Steady steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         List<String> questions = List.of("질문1", "질문2");
         steadyQuestionRepository.saveAll(createSteadyQuestion(steady, questions));
         entityManager.flush();
@@ -339,7 +339,7 @@ class SteadyServiceTest {
     @DisplayName("스테디 식별자를 통해 참여자 전체 조회를 할 수 있다.")
     void getSteadyParticipantsTest() {
         // given
-        var steady = steadyRepository.save(createSteady(leader));
+        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
         var steadyId = steady.getId();
 
         var anotherUser = userRepository.save(createSecondUser(position));
