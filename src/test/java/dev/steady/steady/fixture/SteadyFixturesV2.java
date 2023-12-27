@@ -1,11 +1,14 @@
 package dev.steady.steady.fixture;
 
+import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyPosition;
-import dev.steady.steady.domain.SteadyStack;
+import dev.steady.steady.domain.SteadyQuestion;
+import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
+import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
@@ -27,7 +30,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static dev.steady.steady.domain.ScheduledPeriod.FIVE_MONTH;
-import static dev.steady.steady.domain.ScheduledPeriod.ONE_WEEK;
 import static dev.steady.steady.domain.SteadyMode.ONLINE;
 import static dev.steady.steady.domain.SteadyType.STUDY;
 import static dev.steady.user.fixture.UserFixturesV2.generateStackEntity;
@@ -78,6 +80,25 @@ public class SteadyFixturesV2 {
                 .build();
     }
 
+    public static Steady createSteadyWithStatus(User leader, List<Stack> stacks, SteadyStatus status) {
+        Steady steady = Steady.builder()
+                .name("테스트 스테디")
+                .bio("우리 스터디는 정말 열심히 합니다.")
+                .contact("geonhee33@gmail.com")
+                .type(STUDY)
+                .participantLimit(5)
+                .steadyMode(ONLINE)
+                .scheduledPeriod(FIVE_MONTH)
+                .deadline(LocalDate.of(2030, 1, 2))
+                .title("스테디 제목")
+                .content("스테디 본문")
+                .leader(leader)
+                .stacks(stacks)
+                .build();
+        ReflectionTestUtils.setField(steady, "status", status);
+        return steady;
+    }
+
     public static Steady createSteadyEntity() {
         var leader = UserFixturesV2.generateUserEntity();
         var steady = createSteady(leader, List.of(generateStackEntity()));
@@ -86,12 +107,16 @@ public class SteadyFixturesV2 {
         return steady;
     }
 
-    public static SteadyStack createSteadyStack(Steady steady, Stack stack) {
-        return new SteadyStack(stack, steady);
-    }
-
     public static SteadyPosition createSteadyPosition(Steady steady, Position position) {
         return SteadyPosition.builder().steady(steady).position(position).build();
+    }
+
+    public static List<SteadyQuestion> createSteadyQuestion(Steady steady, int size) {
+        return Instancio.ofList(SteadyQuestion.class)
+                .size(size)
+                .set(field(SteadyQuestion::getSteady), steady)
+                .generate(field(SteadyQuestion::getSteady), gen -> gen.intSeq().start(1))
+                .create();
     }
 
     public static SteadySearchRequest createDefaultSteadySearchRequest() {
@@ -107,6 +132,21 @@ public class SteadyFixturesV2 {
                 null,
                 "false",
                 null);
+    }
+
+    public static SteadySearchRequest createUnsatisfiedSteadySearchRequest() {
+        return new SteadySearchRequest(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "false",
+                "말도 안 되는 검색조건입니다. 아무것도 이 조건에 걸리지 않습니다.");
     }
 
     public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
@@ -143,6 +183,17 @@ public class SteadyFixturesV2 {
                 new ParticipantResponse(1L, "weonest", "url1", true),
                 new ParticipantResponse(2L, "nayjk", "url2", false)
         ));
+    }
+
+        public static SliceResponse<MySteadyResponse> createMySteadyResponse() {
+        return new SliceResponse<>(
+                List.of(
+                        new MySteadyResponse(1L, "스테디 제목", "email", true, LocalDateTime.of(2023, 12, 31, 11, 10)),
+                        new MySteadyResponse(2L, "스테디 제목2", "email", false, LocalDateTime.of(2023, 12, 31, 11, 10))
+                ),
+                2,
+                false
+        );
     }
 
 }
