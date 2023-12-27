@@ -3,7 +3,6 @@ package dev.steady.auth.service;
 import dev.steady.auth.domain.repository.AccountRepository;
 import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.UserRepository;
-import dev.steady.user.fixture.UserFixtures;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,7 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import static dev.steady.auth.fixture.AccountFixture.createAccount;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -48,10 +48,10 @@ class AccountServiceTest {
         var account = createAccount();
         var savedAccount = accountRepository.save(account);
 
-        var position = UserFixtures.createPosition();
+        var position = generatePosition();
         var savedPosition = positionRepository.save(position);
 
-        var user = createFirstUser(savedPosition);
+        var user = generateUser(savedPosition);
         var savedUser = userRepository.save(user);
 
         // when

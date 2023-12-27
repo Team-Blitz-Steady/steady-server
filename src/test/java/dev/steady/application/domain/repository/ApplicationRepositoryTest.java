@@ -20,12 +20,10 @@ import java.util.List;
 
 import static dev.steady.application.domain.ApplicationStatus.WAITING;
 import static dev.steady.application.fixture.ApplicationFixture.createApplication;
-import static dev.steady.steady.fixture.SteadyFixtures.createSteady;
-import static dev.steady.user.fixture.UserFixtures.createFirstUser;
-import static dev.steady.user.fixture.UserFixtures.createPosition;
-import static dev.steady.user.fixture.UserFixtures.createSecondUser;
-import static dev.steady.user.fixture.UserFixtures.createStack;
-import static dev.steady.user.fixture.UserFixtures.createThirdUser;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
+import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
+import static dev.steady.user.fixture.UserFixturesV2.generateStack;
+import static dev.steady.user.fixture.UserFixturesV2.generateUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -61,12 +59,12 @@ class ApplicationRepositoryTest {
     @Test
     void findAllBySteadyId() {
         //given
-        var position = positionRepository.save(createPosition());
-        var leader = userRepository.save(createFirstUser(position));
-        var savedStack = stackRepository.save(createStack());
-        var steady = steadyRepository.save(createSteady(leader, savedStack));
-        var secondUser = userRepository.save(createSecondUser(position));
-        var thirdUser = userRepository.save(createThirdUser(position));
+        var position = positionRepository.save(generatePosition());
+        var leader = userRepository.save(generateUser(position));
+        var savedStack = stackRepository.save(generateStack());
+        var steady = steadyRepository.save(createSteady(leader, List.of(savedStack)));
+        var secondUser = userRepository.save(generateUser(position));
+        var thirdUser = userRepository.save(generateUser(position));
         applicationRepository.saveAll(List.of(createApplication(secondUser, steady),
                 createApplication(thirdUser, steady)));
         //when
