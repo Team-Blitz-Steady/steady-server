@@ -41,7 +41,6 @@ public record SteadyDetailResponse(
 
     public static SteadyDetailResponse of(Steady steady,
                                           List<SteadyPosition> positions,
-                                          List<SteadyStack> stacks,
                                           boolean isLeader,
                                           Long applicationId,
                                           boolean isLiked) {
@@ -63,7 +62,7 @@ public record SteadyDetailResponse(
                 positions.stream()
                         .map(SteadyPositionResponse::from)
                         .toList(),
-                stacks.stream()
+                steady.getSteadyStacks().stream()
                         .map(SteadyStackResponse::from)
                         .toList(),
                 isLeader,
