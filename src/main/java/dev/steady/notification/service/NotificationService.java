@@ -2,9 +2,9 @@ package dev.steady.notification.service;
 
 import dev.steady.global.auth.UserInfo;
 import dev.steady.notification.domain.Notification;
-import dev.steady.notification.domain.NotificationStrategy;
 import dev.steady.notification.domain.repository.NotificationRepository;
 import dev.steady.notification.dto.NotificationsResponse;
+import dev.steady.notification.event.NotificationEvent;
 import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +22,8 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void create(NotificationStrategy notificationStrategy) {
-        Notification notification = notificationStrategy.toEntity();
+    public void create(NotificationEvent event) {
+        Notification notification = event.toEntity();
         notificationRepository.save(notification);
     }
 

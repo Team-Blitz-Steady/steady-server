@@ -1,31 +1,33 @@
-package dev.steady.notification.domain;
+package dev.steady.notification.event;
 
 import dev.steady.application.domain.Application;
 import dev.steady.application.domain.ApplicationStatus;
+import dev.steady.notification.domain.NotificationResult;
+import dev.steady.notification.domain.NotificationType;
 import dev.steady.steady.domain.Steady;
 
-public class ApplicationResultNotificationStrategy extends NotificationStrategy {
+public class ApplicationResultNotificationEvent extends NotificationEvent {
 
     private final Steady steady;
     private final ApplicationStatus status;
 
-    public ApplicationResultNotificationStrategy(Application application) {
+    public ApplicationResultNotificationEvent(Application application) {
         super(application.getUser(), NotificationType.APPLICATION_RESULT);
         this.steady = application.getSteady();
         this.status = application.getStatus();
     }
 
     @Override
-    public String getMessage() {
-        return NotificationMessage.getApplicationResultMessage(steady.getName(), status);
+    public String getName() {
+        return steady.getName();
     }
 
     @Override
-    public String getRedirectUri() {
+    public NotificationResult getResult() {
         if (status == ApplicationStatus.ACCEPTED) {
-            return "/mysteady";
+            return NotificationResult.ACCEPTED;
         }
-        return "/mypage/application";
+        return NotificationResult.REJECTED;
     }
 
 }

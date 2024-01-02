@@ -51,9 +51,9 @@ class NotificationControllerTest extends ControllerTestConfig {
                         ),
                         responseFields(
                                 fieldWithPath("notifications[].id").type(NUMBER).description("알림 식별자"),
+                                fieldWithPath("notifications[].name").type(STRING).description("알림 대상 스테디 이름"),
                                 fieldWithPath("notifications[].type").type(STRING).description("알림 타입"),
-                                fieldWithPath("notifications[].content").type(STRING).description("알림 내용"),
-                                fieldWithPath("notifications[].redirectUri").type(STRING).description("리다이렉트 Uri"),
+                                fieldWithPath("notifications[].result").type(STRING).description("알림 결과"),
                                 fieldWithPath("notifications[].isRead").type(BOOLEAN).description("읽음 여부"),
                                 fieldWithPath("freshCount").type(NUMBER).description("읽지 않은 알림 개수")
                         )

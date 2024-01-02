@@ -16,16 +16,15 @@ import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.global.exception.DuplicateException;
 import dev.steady.global.exception.ForbiddenException;
-import dev.steady.notification.domain.ApplicationResultNotificationStrategy;
-import dev.steady.notification.domain.FreshApplicationNotificationStrategy;
-import dev.steady.notification.domain.NotificationStrategy;
-import dev.steady.notification.service.NotificationService;
+import dev.steady.notification.event.ApplicationResultNotificationEvent;
+import dev.steady.notification.event.FreshApplicationNotificationEvent;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.user.domain.User;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -47,7 +46,7 @@ public class ApplicationService {
     private final SteadyRepository steadyRepository;
     private final ApplicationRepository applicationRepository;
     private final SurveyResultRepository surveyResultRepository;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CreateApplicationResponse createApplication(Long steadyId, List<SurveyResultRequest> request, UserInfo userInfo) {
@@ -58,7 +57,7 @@ public class ApplicationService {
         Application application = saveApplication(user, steady);
         saveSurveyResults(application, request);
 
-        createNotification(new FreshApplicationNotificationStrategy(steady));
+        eventPublisher.publishEvent(new FreshApplicationNotificationEvent(steady));
         return CreateApplicationResponse.from(application);
     }
 
@@ -100,7 +99,7 @@ public class ApplicationService {
         if (request.status() == ACCEPTED) {
             addParticipant(application, leader);
         }
-        createNotification(new ApplicationResultNotificationStrategy(application));
+        eventPublisher.publishEvent(new ApplicationResultNotificationEvent(application));
     }
 
     @Transactional
@@ -161,14 +160,6 @@ public class ApplicationService {
                         surveys.get(index).answer(),
                         index))
                 .toList();
-    }
-
-    private void createNotification(NotificationStrategy notificationStrategy) {
-        try {
-            notificationService.create(notificationStrategy);
-        } catch (Exception exception) {
-            log.warn("알림 생성 오류", exception);
-        }
     }
 
 }

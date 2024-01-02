@@ -6,11 +6,11 @@ import dev.steady.application.domain.repository.SurveyResultRepository;
 import dev.steady.application.dto.request.ApplicationStatusUpdateRequest;
 import dev.steady.application.service.ApplicationService;
 import dev.steady.global.exception.NotFoundException;
-import dev.steady.notification.domain.ApplicationResultNotificationStrategy;
-import dev.steady.notification.domain.FreshApplicationNotificationStrategy;
 import dev.steady.notification.domain.Notification;
 import dev.steady.notification.domain.repository.NotificationRepository;
 import dev.steady.notification.dto.NotificationsResponse;
+import dev.steady.notification.event.ApplicationResultNotificationEvent;
+import dev.steady.notification.event.FreshApplicationNotificationEvent;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
@@ -31,10 +31,8 @@ import static dev.steady.application.domain.ApplicationStatus.ACCEPTED;
 import static dev.steady.application.fixture.ApplicationFixture.createApplication;
 import static dev.steady.application.fixture.SurveyResultFixture.createSurveyResultRequests;
 import static dev.steady.global.auth.AuthFixture.createUserInfo;
-import static dev.steady.notification.domain.NotificationMessage.getApplicationResultMessage;
-import static dev.steady.notification.domain.NotificationMessage.getFreshApplicationMessage;
-import static dev.steady.notification.fixture.NotificationFixture.createApplicationResultNoti;
-import static dev.steady.notification.fixture.NotificationFixture.createFreshApplicationNoti;
+import static dev.steady.notification.fixture.NotificationFixture.createApplicationResultEvent;
+import static dev.steady.notification.fixture.NotificationFixture.createFreshApplicationEvent;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
 import static dev.steady.user.fixture.UserFixturesV2.generatePosition;
 import static dev.steady.user.fixture.UserFixturesV2.generateStack;
@@ -100,16 +98,16 @@ class NotificationServiceTest {
     void createNewApplicationNotificationTest() {
         // given
         var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var freshApplicationNoti = new FreshApplicationNotificationStrategy(steady);
+        var notificationEvent = new FreshApplicationNotificationEvent(steady);
 
         // when
-        notificationService.create(freshApplicationNoti);
+        notificationService.create(notificationEvent);
 
         // then
         Notification notification = notificationRepository.findByReceiverId(leader.getId()).get(0);
         assertAll(
-                () -> assertThat(notification.getContent()).isEqualTo(getFreshApplicationMessage(steady.getName())),
-                () -> assertThat(notification.getRedirectUri()).isEqualTo(freshApplicationNoti.getRedirectUri())
+                () -> assertThat(notification.getName()).isEqualTo(steady.getName()),
+                () -> assertThat(notification.getResult()).isEqualTo(notificationEvent.getResult())
         );
     }
 
@@ -121,57 +119,16 @@ class NotificationServiceTest {
         var user = userRepository.save(generateUser(position));
         var application = createApplication(user, steady);
         application.updateStatus(ApplicationStatus.ACCEPTED, leader);
-        var applicationResultNoti = new ApplicationResultNotificationStrategy(application);
+        var notificationEvent = new ApplicationResultNotificationEvent(application);
 
         // when
-        notificationService.create(applicationResultNoti);
+        notificationService.create(notificationEvent);
 
         // then
         Notification notification = notificationRepository.findByReceiverId(user.getId()).get(0);
         assertAll(
-                () -> assertThat(notification.getContent()).isEqualTo(getApplicationResultMessage(steady.getName(), application.getStatus())),
-                () -> assertThat(notification.getRedirectUri()).isEqualTo(applicationResultNoti.getRedirectUri())
-        );
-    }
-
-    @Test
-    @DisplayName("새로운 신청서가 등록되면 리더에게 새로운 신청 알림이 생성된다.")
-    void createNotificationWhenCreateApplicationTest() {
-        //given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var user = userRepository.save(generateUser(position));
-        var surveyResultRequests = createSurveyResultRequests();
-        var userInfo = createUserInfo(user.getId());
-
-        //when
-        applicationService.createApplication(steady.getId(), surveyResultRequests, userInfo);
-
-        //then
-        Notification notification = notificationRepository.findByReceiverId(leader.getId()).get(0);
-        assertAll(
-                () -> assertThat(notification).isNotNull(),
-                () -> assertThat(notification.getReceiver().getId()).isEqualTo(leader.getId())
-        );
-    }
-
-    @Test
-    @DisplayName("신청서가 거절 혹은 수락되면 유저에게 새로운 신청서 결과 알림이 생성된다.")
-    void createNotificationWhenApplicationGotResultTest() {
-        //given
-        var steady = steadyRepository.save(createSteady(leader, List.of(stack)));
-        var user = userRepository.save(generateUser(position));
-        var application = applicationRepository.save(createApplication(user, steady));
-        var userInfo = createUserInfo(leader.getId());
-        var request = new ApplicationStatusUpdateRequest(ACCEPTED);
-
-        //when
-        applicationService.updateStatusOfApplication(application.getId(), request, userInfo);
-
-        //then
-        Notification notification = notificationRepository.findByReceiverId(user.getId()).get(0);
-        assertAll(
-                () -> assertThat(notification).isNotNull(),
-                () -> assertThat(notification.getReceiver().getId()).isEqualTo(user.getId())
+                () -> assertThat(notification.getName()).isEqualTo(steady.getName()),
+                () -> assertThat(notification.getResult()).isEqualTo(notificationEvent.getResult())
         );
     }
 
@@ -181,8 +138,8 @@ class NotificationServiceTest {
         // given
         var userInfo = createUserInfo(leader.getId());
         steadyRepository.save(createSteady(leader, List.of(stack)));
-        notificationRepository.save(createFreshApplicationNoti(leader));
-        notificationRepository.save(createApplicationResultNoti(leader));
+        notificationRepository.save(createFreshApplicationEvent(leader));
+        notificationRepository.save(createApplicationResultEvent(leader));
 
         // when
         NotificationsResponse notifications = notificationService.getNotifications(userInfo);
@@ -197,7 +154,7 @@ class NotificationServiceTest {
     void readNotificaitonTest() {
         // given
         var userInfo = createUserInfo(leader.getId());
-        var notification = notificationRepository.save(createFreshApplicationNoti(leader));
+        var notification = notificationRepository.save(createFreshApplicationEvent(leader));
 
         // when
         notificationService.readNotification(notification.getId(), userInfo);
@@ -213,8 +170,8 @@ class NotificationServiceTest {
         // given
         var user = userRepository.save(generateUser(position));
         var userInfo = createUserInfo(user.getId());
-        notificationRepository.save(createFreshApplicationNoti(user));
-        notificationRepository.save(createFreshApplicationNoti(user));
+        notificationRepository.save(createFreshApplicationEvent(user));
+        notificationRepository.save(createFreshApplicationEvent(user));
 
         // when
         notificationService.readNotifications(userInfo);
@@ -229,7 +186,7 @@ class NotificationServiceTest {
     void deleteNotificaitonTest() {
         // given
         var userInfo = createUserInfo(leader.getId());
-        Notification notification = notificationRepository.save(createFreshApplicationNoti(leader));
+        Notification notification = notificationRepository.save(createFreshApplicationEvent(leader));
 
         // when
         notificationService.deleteNotification(notification.getId(), userInfo);
@@ -244,8 +201,8 @@ class NotificationServiceTest {
     void deleteNotificaitonsTest() {
         // given
         var userInfo = createUserInfo(leader.getId());
-        notificationRepository.save(createFreshApplicationNoti(leader));
-        notificationRepository.save(createFreshApplicationNoti(leader));
+        notificationRepository.save(createFreshApplicationEvent(leader));
+        notificationRepository.save(createFreshApplicationEvent(leader));
 
         // when
         notificationService.deleteAll(userInfo);

@@ -1,8 +1,10 @@
 package dev.steady.notification.domain;
 
+import dev.steady.application.domain.ApplicationStatus;
 import dev.steady.global.entity.BaseEntity;
 import dev.steady.user.domain.User;
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -29,14 +31,15 @@ public class Notification extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NotificationType type;
 
     @Column(nullable = false)
-    private String content;
-
-    @Column(nullable = false)
-    private String redirectUri;
+    @Enumerated(EnumType.STRING)
+    private NotificationResult result;
 
     @Column(nullable = false)
     private boolean isRead;
@@ -46,10 +49,10 @@ public class Notification extends BaseEntity {
     private User receiver;
 
     @Builder
-    private Notification(NotificationType type, String content, String redirectUri, User receiver) {
+    private Notification(NotificationType type, NotificationResult result, String name, User receiver) {
+        this.name = name;
         this.type = type;
-        this.content = content;
-        this.redirectUri = redirectUri;
+        this.result = result;
         this.isRead = false;
         this.receiver = receiver;
     }
