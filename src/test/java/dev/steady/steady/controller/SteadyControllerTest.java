@@ -6,18 +6,22 @@ import dev.steady.global.auth.Authentication;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.global.config.ControllerTestConfig;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.RankCondition;
+import dev.steady.steady.dto.request.RankParams;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.steady.dto.response.SteadyRankResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
@@ -31,6 +35,7 @@ import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyEntity;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyPageResponse;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyPosition;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyQuestionsResponse;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyRankResponses;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyCreateRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.generateSteadyUpdateRequest;
 import static dev.steady.user.fixture.UserFixturesV2.generatePositionEntity;
@@ -142,6 +147,42 @@ class SteadyControllerTest extends ControllerTestConfig {
                                 fieldWithPath("content[].joinedAt").type(STRING).description("스테디 참여 시간"),
                                 fieldWithPath("numberOfElements").type(NUMBER).description("조회된 스테디 갯수"),
                                 fieldWithPath("hasNext").type(BOOLEAN).description("다음페이지 유무")
+                        )
+                ))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    @DisplayName("조건에 맞는 인기 게시물 리스트를 반환합니다.")
+    void findPopularStudyTest() throws Exception {
+        // given
+        var params = new RankParams(LocalDate.of(2023, 12, 31), 10, "ALL");
+
+        RankCondition condition = params.toCondition();
+        List<SteadyRankResponse> response = createSteadyRankResponses();
+        given(steadyService.findPopularStudies(condition)).willReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/steadies/rank")
+                        .param("date", "2023-12-31")
+                        .param("limit", "10")
+                        .param("type", "ALL")
+                )
+                .andDo(document("popular-steady",
+                        queryParameters(
+                                parameterWithName("date").description("기준 날짜 이후 생성 스테디"),
+                                parameterWithName("limit").description("제한 10개 이하 가능"),
+                                parameterWithName("type").description("ALL, STUDY, PROJECT")
+                        ),
+                        responseFields(
+                                fieldWithPath("[].steadyId").type(NUMBER).description("스테디 식별자"),
+                                fieldWithPath("[].title").type(STRING).description("스테디 제목"),
+                                fieldWithPath("[].type").type(STRING).description("스테디 타입"),
+                                fieldWithPath("[].status").type(STRING).description("스테디 상태"),
+                                fieldWithPath("[].deadline").type(STRING).description("마감일"),
+                                fieldWithPath("[].viewCount").type(NUMBER).description("조회수"),
+                                fieldWithPath("[].likeCount").type(NUMBER).description("좋아요 수")
                         )
                 ))
                 .andExpect(status().isOk())
