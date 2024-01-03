@@ -17,6 +17,7 @@ import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.SteadyStackRepository;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
@@ -27,6 +28,7 @@ import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.steady.dto.response.SteadyRankResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -45,6 +47,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -54,6 +57,7 @@ import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createDefaultSteadySearchRequest;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createOrderByDeadLineSteadySearchRequest;
+import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadiesWithLikeCount;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteady;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyQuestion;
 import static dev.steady.steady.fixture.SteadyFixturesV2.createSteadyWithStatus;
@@ -164,6 +168,23 @@ class SteadyServiceTest {
                 () -> assertThat(content).hasSameSizeAs(steadies),
                 () -> assertThat(content.get(0).promotedAt()).isAfter(content.get(1).promotedAt())
         );
+    }
+
+    @Test
+    @DisplayName("랭킹 조건의 따른 스테디 인기글 조회")
+    void getPopularSteadiesTest() {
+        //given
+        var steadies = createSteadiesWithLikeCount(leader, List.of(stack), 3);
+        steadyRepository.saveAll(steadies);
+        var rankCondition = RankCondition.of(LocalDate.now().minusDays(1), 3, "ALL");
+
+        //when
+        List<SteadyRankResponse> popularSteadies = steadyService.findPopularStudies(rankCondition);
+
+        //then
+        int firstRank = popularSteadies.get(0).likeCount();
+        int secondRank = popularSteadies.get(1).likeCount();
+        assertThat(firstRank).isGreaterThan(secondRank);
     }
 
     @Test
