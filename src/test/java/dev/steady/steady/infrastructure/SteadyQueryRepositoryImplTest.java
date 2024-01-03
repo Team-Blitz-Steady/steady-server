@@ -49,7 +49,7 @@ class SteadyQueryRepositoryImplTest {
     private EntityManager entityManager;
 
     @Autowired
-    private SteadySearchRepositoryImpl queryDslRepository;
+    private SteadyQueryRepositoryImpl queryDslRepository;
 
     @Autowired
     private UserRepository userRepository;
