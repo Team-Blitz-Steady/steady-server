@@ -13,7 +13,7 @@ import org.springframework.data.domain.Slice;
 
 import java.util.List;
 
-public interface SteadySearchRepository {
+public interface SteadyQueryRepository {
 
     Page<Steady> findAllByFilterCondition(UserInfo userInfo, FilterConditionDto condition, Pageable pageable);
 

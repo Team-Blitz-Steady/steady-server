@@ -44,7 +44,7 @@ import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.orderBySor
 @Repository
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class SteadySearchRepositoryImpl implements SteadySearchRepository {
+public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
