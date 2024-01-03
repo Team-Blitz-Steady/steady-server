@@ -12,8 +12,6 @@ public record SteadyRankResponse(
         SteadyType type,
         SteadyStatus status,
         LocalDate deadline,
-        int participantLimit,
-        int numberOfParticipants,
         int viewCount,
         int likeCount
 ) {
@@ -25,8 +23,6 @@ public record SteadyRankResponse(
                 steady.getType(),
                 steady.getStatus(),
                 steady.getDeadline(),
-                steady.getParticipantLimit(),
-                steady.getNumberOfParticipants(),
                 steady.getViewCount(),
                 steady.getLikeCount()
         );
