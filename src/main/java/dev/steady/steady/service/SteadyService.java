@@ -90,8 +90,9 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public List<SteadyRankResponse> getPopularStudy(RankCondition condition) {
+    public List<SteadyRankResponse> findPopularStudies(RankCondition condition) {
         List<Steady> steadies = steadyRepository.findPopularStudyInCondition(condition);
+
         return steadies.stream()
                 .map(SteadyRankResponse::from)
                 .toList();

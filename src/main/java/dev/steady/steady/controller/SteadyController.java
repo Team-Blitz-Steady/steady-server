@@ -72,9 +72,9 @@ public class SteadyController {
     }
 
     @GetMapping("/rank")
-    public ResponseEntity<List<SteadyRankResponse>> getPopularStudy(@Valid RankParams params) {
+    public ResponseEntity<List<SteadyRankResponse>> findPopularStudies(@Valid RankParams params) {
         RankCondition condition = params.toCondition();
-        List<SteadyRankResponse> popularStudy = steadyService.getPopularStudy(condition);
+        List<SteadyRankResponse> popularStudy = steadyService.findPopularStudies(condition);
 
         return ResponseEntity.ok(popularStudy);
     }
