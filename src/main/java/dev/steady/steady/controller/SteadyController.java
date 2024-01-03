@@ -5,6 +5,7 @@ import dev.steady.global.auth.Auth;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.request.RankParams;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyPageRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
@@ -13,9 +14,11 @@ import dev.steady.steady.dto.request.SteadyUpdateRequest;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
+import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.steady.dto.response.SteadyRankResponse;
 import dev.steady.steady.service.SteadyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -65,6 +69,14 @@ public class SteadyController {
         Pageable pageable = request.toPageable();
         PageResponse<SteadyQueryResponse> response = steadyService.getSteadies(userInfo, condition, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/rank")
+    public ResponseEntity<List<SteadyRankResponse>> findPopularStudies(@Valid RankParams params) {
+        RankCondition condition = params.toCondition();
+        List<SteadyRankResponse> popularStudy = steadyService.findPopularStudies(condition);
+
+        return ResponseEntity.ok(popularStudy);
     }
 
     @GetMapping("/{steadyId}")

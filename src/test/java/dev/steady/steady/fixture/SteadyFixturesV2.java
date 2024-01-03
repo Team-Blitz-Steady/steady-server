@@ -15,6 +15,7 @@ import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.steady.dto.response.SteadyRankResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -28,9 +29,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static dev.steady.steady.domain.ScheduledPeriod.FIVE_MONTH;
 import static dev.steady.steady.domain.SteadyMode.ONLINE;
+import static dev.steady.steady.domain.SteadyStatus.CLOSED;
 import static dev.steady.steady.domain.SteadyType.STUDY;
 import static dev.steady.user.fixture.UserFixturesV2.generateStackEntity;
 import static org.instancio.Select.field;
@@ -78,6 +81,19 @@ public class SteadyFixturesV2 {
                 .leader(leader)
                 .stacks(stacks)
                 .build();
+    }
+
+    public static List<Steady> createSteadiesWithLikeCount(User leader, List<Stack> stacks, int likeCount) {
+        return IntStream.rangeClosed(0, likeCount)
+                .mapToObj(count -> createSteadyWithLikeCount(leader, stacks, count))
+                .toList();
+    }
+
+    public static List<SteadyRankResponse> createSteadyRankResponses() {
+        return List.of(
+                new SteadyRankResponse(2L, "스테디 제목2", STUDY, CLOSED, LocalDate.of(2023, 12, 31), 10, 1),
+                new SteadyRankResponse(2L, "스테디 제목2", STUDY, CLOSED, LocalDate.of(2023, 12, 15), 10, 3)
+        );
     }
 
     public static Steady createSteadyWithStatus(User leader, List<Stack> stacks, SteadyStatus status) {
@@ -194,6 +210,12 @@ public class SteadyFixturesV2 {
                 2,
                 false
         );
+    }
+
+    private static Steady createSteadyWithLikeCount(User leader, List<Stack> stacks, int likeCount) {
+        Steady steady = createSteady(leader, stacks);
+        ReflectionTestUtils.setField(steady, "likeCount", likeCount);
+        return steady;
     }
 
 }

@@ -8,7 +8,10 @@ import dev.steady.global.auth.UserInfo;
 import dev.steady.steady.domain.Participant;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyStatus;
+import dev.steady.steady.domain.SteadyType;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.RankCondition;
+import dev.steady.steady.dto.RankType;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
 import dev.steady.steady.uitl.Cursor;
 import dev.steady.user.domain.User;
@@ -33,6 +36,8 @@ import static dev.steady.steady.domain.QSteadyStack.steadyStack;
 import static dev.steady.steady.domain.SteadyStatus.CLOSED;
 import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
+import static dev.steady.steady.dto.RankType.PROJECT;
+import static dev.steady.steady.dto.RankType.STUDY;
 import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.filterCondition;
 import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.orderBySort;
 
@@ -90,6 +95,18 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
         return new SliceImpl<>(content, pageable, hasNext);
     }
 
+    @Override
+    public List<Steady> findPopularStudyInCondition(RankCondition condition) {
+        return jpaQueryFactory.selectFrom(steady)
+                .where(steady.promotion.promotedAt
+                                .after(condition.date().atStartOfDay()),
+                        steadyTypeCond(condition.type())
+                )
+                .orderBy(steady.likeCount.desc(), steady.viewCount.desc())
+                .limit(condition.limit())
+                .fetch();
+    }
+
     private BooleanExpression isParticipantUserIdEqual(User user) {
         return participant.user.id.eq(user.getId());
     }
@@ -109,6 +126,16 @@ public class SteadySearchRepositoryImpl implements SteadySearchRepository {
         if (status == RECRUITING || status == CLOSED) {
             return steady.status.eq(SteadyStatus.RECRUITING)
                     .or(steady.status.eq(CLOSED));
+        }
+        return null;
+    }
+
+    private BooleanExpression steadyTypeCond(RankType type) {
+        if (type == PROJECT) {
+            return steady.type.eq(SteadyType.PROJECT);
+        }
+        if (type == STUDY) {
+            return steady.type.eq(SteadyType.STUDY);
         }
         return null;
     }

@@ -5,6 +5,7 @@ import dev.steady.application.domain.repository.ApplicationRepository;
 import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.global.exception.InvalidStateException;
+import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.domain.Participant;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyPosition;
@@ -28,6 +29,7 @@ import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
+import dev.steady.steady.dto.response.SteadyRankResponse;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -87,6 +89,15 @@ public class SteadyService {
         return PageResponse.from(searchResponses);
     }
 
+    @Transactional(readOnly = true)
+    public List<SteadyRankResponse> findPopularStudies(RankCondition condition) {
+        List<Steady> steadies = steadyRepository.findPopularStudyInCondition(condition);
+
+        return steadies.stream()
+                .map(SteadyRankResponse::from)
+                .toList();
+    }
+
     @Transactional
     public SteadyDetailResponse getDetailSteady(Long steadyId, UserInfo userInfo) {
         Steady steady = steadyRepository.getSteady(steadyId);
@@ -133,7 +144,7 @@ public class SteadyService {
         steady.update(user,
                 request.name(),
                 request.bio(),
-                request.contact(), 
+                request.contact(),
                 request.type(),
                 request.status(),
                 request.participantLimit(),
