@@ -5,6 +5,7 @@ import dev.steady.global.exception.NotFoundException;
 import dev.steady.user.domain.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ import static dev.steady.steady.exception.SteadyErrorCode.PARTICIPANT_LIMIT_EXCE
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participants {
 
-    @OneToMany(mappedBy = "steady", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "steady", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private final List<Participant> steadyParticipants = new ArrayList<>();
 
     private int participantLimit;
