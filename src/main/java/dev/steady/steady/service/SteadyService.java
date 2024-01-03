@@ -37,6 +37,8 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -66,6 +68,7 @@ public class SteadyService {
     private final ParticipantRepository participantRepository;
 
     @Transactional
+    @CacheEvict(cacheNames = "steadies", allEntries = true)
     public Long create(SteadyCreateRequest request, UserInfo userinfo) {
         Long userId = userinfo.userId();
         User user = userRepository.getUserBy(userId);
@@ -83,6 +86,8 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = "steadies", key = "#pageable.pageNumber",
+            condition = "#conditionDto.status() != null && #conditionDto.status().name() == 'RECRUITING'")
     public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
         Page<Steady> steadies = steadyRepository.findAllByFilterCondition(userInfo, conditionDto, pageable);
         Page<SteadyQueryResponse> searchResponses = steadies.map(SteadyQueryResponse::from);
@@ -191,7 +196,9 @@ public class SteadyService {
         steady.finish(user);
     }
 
+
     @Transactional
+    @CacheEvict(cacheNames = "steadies", allEntries = true)
     public void deleteSteady(Long steadyId, UserInfo userInfo) {
         User user = userRepository.getUserBy(userInfo.userId());
         Steady steady = steadyRepository.getSteady(steadyId);
