@@ -23,6 +23,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -207,6 +208,10 @@ public class Steady extends BaseEntity {
 
     public int getPromotionCount() {
         return promotion.getPromotionCount();
+    }
+
+    public LocalDateTime getPromotedAt() {
+        return promotion.getPromotedAt();
     }
 
     public int getParticipantLimit() {

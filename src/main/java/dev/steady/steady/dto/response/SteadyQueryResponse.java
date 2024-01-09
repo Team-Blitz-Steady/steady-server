@@ -40,7 +40,7 @@ public record SteadyQueryResponse(
                 steady.getStatus(),
                 steady.getDeadline(),
                 steady.getCreatedAt(),
-                steady.getPromotion().getPromotedAt(),
+                steady.getPromotedAt(),
                 steady.getParticipantLimit(),
                 steady.getNumberOfParticipants(),
                 steady.getViewCount(),
