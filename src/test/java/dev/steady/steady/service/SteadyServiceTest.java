@@ -143,7 +143,7 @@ class SteadyServiceTest {
     }
 
     @Test
-    @DisplayName("스테디 페이징 요청을 통해 끌어올린 시간을 기준으로 내림차순 정렬된 응답을 반환할 수 있다.")
+    @DisplayName("스테디 목록 조회 요청을 통해 끌어올린 시간을 기준으로 내림차순 정렬된 응답을 반환할 수 있다.")
     void getSteadiesSearchTest() {
         // given
         var userInfo = createUserInfo(leader.getId());

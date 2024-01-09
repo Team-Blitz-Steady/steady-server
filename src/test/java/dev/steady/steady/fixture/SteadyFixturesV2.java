@@ -137,7 +137,7 @@ public class SteadyFixturesV2 {
 
     public static SteadySearchRequest createDefaultSteadySearchRequest() {
         return new SteadySearchRequest(
-                null,
+                0,
                 null,
                 null,
                 null,
@@ -165,6 +165,21 @@ public class SteadyFixturesV2 {
                 "말도 안 되는 검색조건입니다. 아무것도 이 조건에 걸리지 않습니다.");
     }
 
+    public static SteadySearchRequest createCacheableRequest() {
+        return new SteadySearchRequest(
+                1,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "recruiting",
+                "false",
+                null);
+    }
+
     public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
         return new SteadySearchRequest(
                 null,
@@ -181,8 +196,8 @@ public class SteadyFixturesV2 {
     }
 
     public static PageResponse<SteadyQueryResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
-        Page<Steady> steadies = new PageImpl<>(List.of(steady), pageable, 1);
-        return PageResponse.from(steadies.map(SteadyQueryResponse::from));
+        SteadyQueryResponse queryResponse = SteadyQueryResponse.from(steady);
+        return PageResponse.promotedAtResponse(List.of(queryResponse), 0L, queryResponse.promotedAt(), queryResponse.promotedAt());
     }
 
     public static SteadyQuestionsResponse createSteadyQuestionsResponse() {

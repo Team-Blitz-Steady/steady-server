@@ -96,12 +96,12 @@ class SteadyQueryRepositoryImplTest {
         var pageable = request.toPageable();
         var condition = FilterConditionDto.from(request);
         var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
-        var returnedSteady = response.getContent().get(0);
+        var returnedSteady = response.result().get(0);
 
         // then
         int expectedSize = 1;
         assertAll(
-                () -> assertThat(response.getTotalElements()).isEqualTo(expectedSize),
+                () -> assertThat(response.result().size()).isEqualTo(expectedSize),
                 () -> assertThat(returnedSteady.getId()).isEqualTo(steady.getId())
         );
     }
@@ -124,7 +124,7 @@ class SteadyQueryRepositoryImplTest {
         var response = queryDslRepository.findAllByFilterCondition(null, condition, pageable);
 
         // then
-        assertThat(response.getTotalElements()).isZero();
+        assertThat(response.result().size()).isZero();
     }
 
     @Test
@@ -147,7 +147,7 @@ class SteadyQueryRepositoryImplTest {
 
         // then
         int expectedSize = 1;
-        assertThat(response.getTotalElements()).isEqualTo(expectedSize);
+        assertThat(response.result().size()).isEqualTo(expectedSize);
     }
 
     @DisplayName("내가 참여한 전체 스테디를 조회한다.")

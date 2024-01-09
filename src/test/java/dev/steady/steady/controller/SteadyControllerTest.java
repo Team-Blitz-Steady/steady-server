@@ -208,7 +208,6 @@ class SteadyControllerTest extends ControllerTestConfig {
         }};
 
         var pageable = searchRequest.toPageable();
-        var condition = FilterConditionDto.from(searchRequest);
         var steady = createSteadyEntity();
         var response = createSteadyPageResponse(steady, pageable);
 
@@ -252,9 +251,8 @@ class SteadyControllerTest extends ControllerTestConfig {
                                 fieldWithPath("content[].likeCount").type(NUMBER).description("좋아요 수"),
                                 fieldWithPath("numberOfElements").type(NUMBER).description("현재 페이지 조회된 개수"),
                                 fieldWithPath("page").type(NUMBER).description("현재 페이지"),
-                                fieldWithPath("size").type(NUMBER).description("페이지 크기"),
-                                fieldWithPath("totalPages").type(NUMBER).description("전체 페이지 개수"),
-                                fieldWithPath("totalElements").type(NUMBER).description("전체 개수")
+                                fieldWithPath("prevCursor").type(STRING).description("이전 커서"),
+                                fieldWithPath("nextCursor").type(STRING).description("다음 커서")
                         )
                 ))
                 .andExpect(status().isOk())
