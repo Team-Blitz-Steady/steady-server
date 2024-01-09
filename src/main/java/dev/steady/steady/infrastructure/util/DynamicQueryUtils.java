@@ -47,4 +47,16 @@ public class DynamicQueryUtils {
         return null;
     }
 
+    public static <T> OrderSpecifier reverseOrderBySort(Sort sort, Class<T> clazz) {
+        for (Sort.Order order : sort) {
+            Order direction = order.isAscending() ? Order.DESC : Order.ASC;
+            String property = order.getProperty();
+
+            String className = lowercaseFirstLetter(clazz.getSimpleName());
+            PathBuilder<T> target = new PathBuilder<>(clazz, className);
+            return new OrderSpecifier(direction, target.get(property));
+        }
+        return null;
+    }
+
 }
