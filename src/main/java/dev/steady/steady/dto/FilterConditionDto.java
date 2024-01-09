@@ -88,13 +88,12 @@ public record FilterConditionDto(
     }
 
     public boolean cacheable() {
-        if (Objects.isNull(steadyType) && Objects.isNull(steadyMode) && stacks.isEmpty() && positions.isEmpty()
-                && like == false && !Strings.hasText(keyword) && status.equals(SteadyStatus.RECRUITING)) {
+        if (Objects.isNull(steadyType) && Objects.isNull(steadyMode) && stacks.isEmpty()
+                && positions.isEmpty() && like == false && !Strings.hasText(keyword)
+                && Objects.nonNull(status) && status.equals(SteadyStatus.RECRUITING)) {
             return true;
         }
         return false;
     }
 
 }
-
-
