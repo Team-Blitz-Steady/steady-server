@@ -10,5 +10,4 @@ public enum SteadyStatus {
         return SteadyStatus.valueOf(status.toUpperCase());
     }
 
-
 }
