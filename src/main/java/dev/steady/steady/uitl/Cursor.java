@@ -14,18 +14,19 @@ public class Cursor {
     private LocalDateTime promotedAt;
     private LocalDate deadline;
 
-    public static Cursor of(String criteria, String cursor) {
-        if (criteria.equals("deadline")) {
-            if (Strings.hasText(cursor)) {
-                return new Cursor(null, CursorFormatter.getLocalDate(cursor));
-            }
-            return new Cursor(null, LocalDate.now());
-        }
-
+    public static Cursor promotedAtCursor(String cursor) {
         if (Strings.hasText(cursor)) {
             return new Cursor(CursorFormatter.getLocalDateTime(cursor), null);
         }
         return new Cursor(LocalDateTime.now(), null);
+
+    }
+
+    public static Cursor deadlineCursor(String cursor) {
+        if (Strings.hasText(cursor)) {
+            return new Cursor(null, CursorFormatter.getLocalDate(cursor));
+        }
+        return new Cursor(null, LocalDate.now());
     }
 
 }

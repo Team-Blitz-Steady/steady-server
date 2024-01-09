@@ -5,6 +5,7 @@ import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.domain.SteadyType;
 import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.uitl.Cursor;
+import io.jsonwebtoken.lang.Strings;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -44,10 +45,10 @@ public record FilterConditionDto(
     }
 
     private static Cursor filterCursor(String criteria, String cursor) {
-        if (Objects.isNull(criteria)) {
-            criteria = "promotion.promotedAt";
+        if (Objects.isNull(criteria) || criteria.equals("promotion.promotedAt")) {
+            return Cursor.promotedAtCursor(cursor);
         }
-        return Cursor.of(criteria, cursor);
+        return Cursor.deadlineCursor(cursor);
     }
 
     private static SteadyType filterSteadyType(String steadyType) {
@@ -84,6 +85,14 @@ public record FilterConditionDto(
 
     private static boolean filterLikeCondition(String like) {
         return like.equals("true");
+    }
+
+    public boolean cacheable() {
+        if (Objects.isNull(steadyType) && Objects.isNull(steadyMode) && stacks.isEmpty() && positions.isEmpty()
+                && like == false && !Strings.hasText(keyword) && status.equals(SteadyStatus.RECRUITING)) {
+            return true;
+        }
+        return false;
     }
 
 }
