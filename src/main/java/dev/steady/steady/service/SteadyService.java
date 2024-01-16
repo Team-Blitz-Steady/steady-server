@@ -22,6 +22,7 @@ import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
+import dev.steady.steady.dto.response.CursorResponse;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
@@ -31,7 +32,7 @@ import dev.steady.steady.dto.response.SteadyFilterResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
 import dev.steady.steady.dto.response.SteadyRankResponse;
-import dev.steady.steady.uitl.PrevCursor;
+import dev.steady.steady.uitl.Cursor;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -47,7 +48,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -88,32 +88,26 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(cacheNames = "steadies", key = "#pageable.pageNumber",
+    @Cacheable(cacheNames = "steadies", key = "#condition.status()",
             condition = "#condition.cacheable() == true")
     public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto condition, Pageable pageable) {
         SteadyFilterResponse filterResponse = steadyRepository.findAllByFilterCondition(userInfo, condition, pageable);
         List<SteadyQueryResponse> searchResponses = filterResponse.result()
                 .stream()
-                .map(SteadyQueryResponse::from).toList();
+                .map(SteadyQueryResponse::from)
+                .toList();
 
-        PrevCursor prevCursor = PrevCursor.from(filterResponse.prevCursor());
-        SteadyQueryResponse nextCursor = searchResponses.get(searchResponses.size() - 1);
+        Cursor prevCursor = Cursor.cursorFromSteady(filterResponse.prevCursorSteady());
+        Cursor nextCursor = Cursor.cursorFromSteady(filterResponse.nextCursorSteady());
 
-        if (Objects.isNull(condition.cursor().getPromotedAt())) {
-            return PageResponse.deadlineResponse(
-                    searchResponses,
-                    pageable.getPageNumber(),
-                    prevCursor.getDeadline(),
-                    nextCursor.deadline()
-            );
+        CursorResponse cursorResponse;
+        if (condition.cursor().isPromotedAtCursor()) {
+            cursorResponse = new CursorResponse<>(prevCursor.getPromotedAt(), nextCursor.getPromotedAt());
+            return PageResponse.of(searchResponses, cursorResponse);
         }
 
-        return PageResponse.promotedAtResponse(
-                searchResponses,
-                pageable.getPageNumber(),
-                prevCursor.getPromotedAt(),
-                nextCursor.promotedAt()
-        );
+        cursorResponse = new CursorResponse<>(prevCursor.getDeadline(), nextCursor.getDeadline());
+        return PageResponse.of(searchResponses, cursorResponse);
     }
 
     @Transactional(readOnly = true)
