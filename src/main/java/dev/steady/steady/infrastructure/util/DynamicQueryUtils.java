@@ -19,7 +19,7 @@ public class DynamicQueryUtils {
     private DynamicQueryUtils() {
     }
 
-    public static <T> BooleanExpression filterCondition(T condition, Function<T, BooleanExpression> function) {
+    public static <T> BooleanExpression filter(T condition, Function<T, BooleanExpression> function) {
         T conditionResult = condition;
 
         if (condition instanceof String str && !StringUtils.hasText(str)) {

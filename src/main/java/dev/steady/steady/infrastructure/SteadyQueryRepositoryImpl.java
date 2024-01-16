@@ -35,7 +35,7 @@ import static dev.steady.steady.domain.SteadyStatus.FINISHED;
 import static dev.steady.steady.domain.SteadyStatus.RECRUITING;
 import static dev.steady.steady.dto.RankType.PROJECT;
 import static dev.steady.steady.dto.RankType.STUDY;
-import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.filterCondition;
+import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.filter;
 import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.orderBySort;
 import static dev.steady.steady.infrastructure.util.DynamicQueryUtils.reverseOrderBySort;
 
@@ -159,11 +159,11 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
         BooleanBuilder builder = new BooleanBuilder();
         Cursor cursor = condition.cursor();
         if (prev) {
-            builder.and(filterCondition(cursor.getPromotedAt(), steady.promotion.promotedAt::goe));
-            builder.and(filterCondition(cursor.getDeadline(), steady.deadline::lt));
+            builder.and(filter(cursor.getPromotedAt(), steady.promotion.promotedAt::goe));
+            builder.and(filter(cursor.getDeadline(), steady.deadline::lt));
         } else {
-            builder.and(filterCondition(cursor.getPromotedAt(), steady.promotion.promotedAt::lt));
-            builder.and(filterCondition(cursor.getDeadline(), steady.deadline::goe));
+            builder.and(filter(cursor.getPromotedAt(), steady.promotion.promotedAt::lt));
+            builder.and(filter(cursor.getDeadline(), steady.deadline::goe));
         }
         return builder;
     }
@@ -172,16 +172,16 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
     private BooleanBuilder filterConditionBuilder(UserInfo userInfo, FilterConditionDto condition) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        builder.and(filterCondition(condition.steadyType(), steady.type::eq));
-        builder.and(filterCondition(condition.steadyMode(), steady.steadyMode::eq));
-        builder.and(filterCondition(condition.stacks(), steadyStack.stack.name::in));
-        builder.and(filterCondition(condition.positions(), steadyPosition.position.name::in));
-        builder.and(filterCondition(condition.status(), steady.status::eq));
+        builder.and(filter(condition.steadyType(), steady.type::eq));
+        builder.and(filter(condition.steadyMode(), steady.steadyMode::eq));
+        builder.and(filter(condition.stacks(), steadyStack.stack.name::in));
+        builder.and(filter(condition.positions(), steadyPosition.position.name::in));
+        builder.and(filter(condition.status(), steady.status::eq));
         if (condition.like()) {
-            builder.and(filterCondition(userInfo.userId(), steadyLike.user.id::eq));
+            builder.and(filter(userInfo.userId(), steadyLike.user.id::eq));
         }
-        builder.and(filterCondition(condition.keyword(), steady.title::contains))
-                .or(filterCondition(condition.keyword(), steady.content::contains));
+        builder.and(filter(condition.keyword(), steady.title::contains))
+                .or(filter(condition.keyword(), steady.content::contains));
 
         return builder;
     }
