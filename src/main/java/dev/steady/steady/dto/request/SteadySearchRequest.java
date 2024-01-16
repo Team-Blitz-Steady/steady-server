@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public record SteadySearchRequest(
-        Integer page,
         String direction,
         String criteria,
         String cursor,
@@ -24,7 +23,7 @@ public record SteadySearchRequest(
 
     public Pageable toPageable() {
         return PageRequest.of(
-                page == null ? DEFAULT_PAGE : page,
+                DEFAULT_PAGE,
                 DEFAULT_SIZE,
                 Sort.by(
                         direction == null ? Sort.Direction.DESC : Sort.Direction.fromString(direction),
