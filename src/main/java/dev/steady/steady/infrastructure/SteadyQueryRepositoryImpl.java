@@ -76,10 +76,8 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        if (prev.isEmpty()) {
-            return new SteadyFilterResponse(steadies, null);
-        }
-        return new SteadyFilterResponse(steadies, prev.get(prev.size() - 1));
+        Steady prevCursor = prev.isEmpty() ? null : prev.get(prev.size() - 1);
+        return new SteadyFilterResponse(steadies, prevCursor);
     }
 
     @Override
