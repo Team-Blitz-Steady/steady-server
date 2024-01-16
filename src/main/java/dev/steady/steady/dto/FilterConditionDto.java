@@ -21,7 +21,8 @@ public record FilterConditionDto(
         List<String> positions,
         SteadyStatus status,
         boolean like,
-        String keyword
+        String keyword,
+        boolean isFirstPage
 ) {
 
     public static FilterConditionDto from(SteadySearchRequest request) {
@@ -32,6 +33,7 @@ public record FilterConditionDto(
         List<String> position = filterStackOrPositionCondition(request.position());
         SteadyStatus status = filterSteadyStatusCondition(request.status());
         boolean like = filterLikeCondition(request.like());
+        boolean isFirstPage = Objects.isNull(request.cursor());
 
         return new FilterConditionDto(
                 cursor,
@@ -41,14 +43,16 @@ public record FilterConditionDto(
                 position,
                 status,
                 like,
-                request.keyword());
+                request.keyword(),
+                isFirstPage);
     }
+
 
     private static Cursor filterCursor(String criteria, String cursor) {
         if (Objects.isNull(criteria) || criteria.equals("promotion.promotedAt")) {
-            return Cursor.promotedAtCursor(cursor);
+            return Cursor.promotedAtCursorFrom(cursor);
         }
-        return Cursor.deadlineCursor(cursor);
+        return Cursor.deadlineCursorFrom(cursor);
     }
 
     private static SteadyType filterSteadyType(String steadyType) {
@@ -89,8 +93,9 @@ public record FilterConditionDto(
 
     public boolean cacheable() {
         if (Objects.isNull(steadyType) && Objects.isNull(steadyMode) && stacks.isEmpty()
-                && positions.isEmpty() && like == false && !Strings.hasText(keyword)
-                && Objects.nonNull(status) && status.equals(SteadyStatus.RECRUITING)) {
+            && positions.isEmpty() && !like && !Strings.hasText(keyword)
+            && Objects.nonNull(status) && status.equals(SteadyStatus.RECRUITING)
+            && isFirstPage) {
             return true;
         }
         return false;
