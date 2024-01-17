@@ -57,7 +57,7 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
                 .on(steady.id.eq(steadyPosition.steady.id))
                 .leftJoin(steadyLike)
                 .on(steady.id.eq(steadyLike.steady.id))
-                .where(filterCursor(condition, false), filterConditionBuilder(userInfo, condition))
+                .where(filterCursorBuilder(condition, false), filterConditionBuilder(userInfo, condition))
                 .orderBy(orderBySort(pageable.getSort(), Steady.class))
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -71,7 +71,7 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
                 .on(steady.id.eq(steadyPosition.steady.id))
                 .leftJoin(steadyLike)
                 .on(steady.id.eq(steadyLike.steady.id))
-                .where(filterCursor(condition, true), filterConditionBuilder(userInfo, condition))
+                .where(filterCursorBuilder(condition, true), filterConditionBuilder(userInfo, condition))
                 .orderBy(reverseOrderBySort(pageable.getSort(), Steady.class))
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
@@ -153,7 +153,7 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
         return null;
     }
 
-    private BooleanBuilder filterCursor(FilterConditionDto condition, boolean prev) {
+    private BooleanBuilder filterCursorBuilder(FilterConditionDto condition, boolean prev) {
         BooleanBuilder builder = new BooleanBuilder();
         Cursor cursor = condition.cursor();
         if (prev) {

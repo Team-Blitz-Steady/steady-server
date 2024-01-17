@@ -4,5 +4,4 @@ public record CursorResponse<T>(
     T prevCursor,
     T nextCursor
 ) {
-
 }
