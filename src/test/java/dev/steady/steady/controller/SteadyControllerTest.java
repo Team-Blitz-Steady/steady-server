@@ -196,7 +196,6 @@ class SteadyControllerTest extends ControllerTestConfig {
         var searchRequest = createDefaultSteadySearchRequest();
         MultiValueMap params = new LinkedMultiValueMap<>() {{
             add("steadyType", null);
-            add("page", null);
             add("direction", null);
             add("criteria", null);
             add("steadyMode", null);
@@ -208,7 +207,6 @@ class SteadyControllerTest extends ControllerTestConfig {
         }};
 
         var pageable = searchRequest.toPageable();
-        var condition = FilterConditionDto.from(searchRequest);
         var steady = createSteadyEntity();
         var response = createSteadyPageResponse(steady, pageable);
 
@@ -221,7 +219,6 @@ class SteadyControllerTest extends ControllerTestConfig {
                         resourceDetails().tag("스테디").description("스테디 검색 및 필터링 조회")
                                 .responseSchema(Schema.schema("PageResponse")),
                         queryParameters(
-                                parameterWithName("page").description("요청 페이지 번호"),
                                 parameterWithName("direction").description("내림/오름차순").optional(),
                                 parameterWithName("criteria").description("정렬 조건").optional(),
                                 parameterWithName("cursor").description("페이징 커서").optional(),
@@ -251,10 +248,8 @@ class SteadyControllerTest extends ControllerTestConfig {
                                 fieldWithPath("content[].stacks[].imageUrl").type(STRING).description("기술 스택 이미지"),
                                 fieldWithPath("content[].likeCount").type(NUMBER).description("좋아요 수"),
                                 fieldWithPath("numberOfElements").type(NUMBER).description("현재 페이지 조회된 개수"),
-                                fieldWithPath("page").type(NUMBER).description("현재 페이지"),
-                                fieldWithPath("size").type(NUMBER).description("페이지 크기"),
-                                fieldWithPath("totalPages").type(NUMBER).description("전체 페이지 개수"),
-                                fieldWithPath("totalElements").type(NUMBER).description("전체 개수")
+                                fieldWithPath("cursor.prevCursor").type(STRING).description("이전 커서"),
+                                fieldWithPath("cursor.nextCursor").type(STRING).description("다음 커서")
                         )
                 ))
                 .andExpect(status().isOk())

@@ -19,7 +19,7 @@ public class DynamicQueryUtils {
     private DynamicQueryUtils() {
     }
 
-    public static <T> BooleanExpression filterCondition(T condition, Function<T, BooleanExpression> function) {
+    public static <T> BooleanExpression filter(T condition, Function<T, BooleanExpression> function) {
         T conditionResult = condition;
 
         if (condition instanceof String str && !StringUtils.hasText(str)) {
@@ -38,6 +38,18 @@ public class DynamicQueryUtils {
     public static <T> OrderSpecifier orderBySort(Sort sort, Class<T> clazz) {
         for (Sort.Order order : sort) {
             Order direction = order.isAscending() ? Order.ASC : Order.DESC;
+            String property = order.getProperty();
+
+            String className = lowercaseFirstLetter(clazz.getSimpleName());
+            PathBuilder<T> target = new PathBuilder<>(clazz, className);
+            return new OrderSpecifier(direction, target.get(property));
+        }
+        return null;
+    }
+
+    public static <T> OrderSpecifier reverseOrderBySort(Sort sort, Class<T> clazz) {
+        for (Sort.Order order : sort) {
+            Order direction = order.isAscending() ? Order.DESC : Order.ASC;
             String property = order.getProperty();
 
             String className = lowercaseFirstLetter(clazz.getSimpleName());

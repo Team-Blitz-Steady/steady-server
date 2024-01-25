@@ -5,7 +5,6 @@ import dev.steady.application.domain.repository.ApplicationRepository;
 import dev.steady.application.dto.response.SliceResponse;
 import dev.steady.global.auth.UserInfo;
 import dev.steady.global.exception.InvalidStateException;
-import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.domain.Participant;
 import dev.steady.steady.domain.Steady;
 import dev.steady.steady.domain.SteadyPosition;
@@ -19,17 +18,21 @@ import dev.steady.steady.domain.repository.SteadyQuestionRepository;
 import dev.steady.steady.domain.repository.SteadyRepository;
 import dev.steady.steady.domain.repository.ViewCountLogRepository;
 import dev.steady.steady.dto.FilterConditionDto;
+import dev.steady.steady.dto.RankCondition;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadyQuestionUpdateRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
+import dev.steady.steady.dto.response.CursorResponse;
 import dev.steady.steady.dto.response.MySteadyQueryResponse;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantsResponse;
 import dev.steady.steady.dto.response.SteadyDetailResponse;
+import dev.steady.steady.dto.response.SteadyFilterResponse;
 import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
 import dev.steady.steady.dto.response.SteadyRankResponse;
+import dev.steady.steady.uitl.Cursor;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -37,7 +40,8 @@ import dev.steady.user.domain.repository.PositionRepository;
 import dev.steady.user.domain.repository.StackRepository;
 import dev.steady.user.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
@@ -66,6 +70,7 @@ public class SteadyService {
     private final ParticipantRepository participantRepository;
 
     @Transactional
+    @CacheEvict(cacheNames = "steadies", allEntries = true)
     public Long create(SteadyCreateRequest request, UserInfo userinfo) {
         Long userId = userinfo.userId();
         User user = userRepository.getUserBy(userId);
@@ -83,10 +88,26 @@ public class SteadyService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto conditionDto, Pageable pageable) {
-        Page<Steady> steadies = steadyRepository.findAllByFilterCondition(userInfo, conditionDto, pageable);
-        Page<SteadyQueryResponse> searchResponses = steadies.map(SteadyQueryResponse::from);
-        return PageResponse.from(searchResponses);
+    @Cacheable(cacheNames = "steadies", key = "#condition.status()",
+            condition = "#condition.cacheable() == true")
+    public PageResponse<SteadyQueryResponse> getSteadies(UserInfo userInfo, FilterConditionDto condition, Pageable pageable) {
+        SteadyFilterResponse filterResponse = steadyRepository.findAllByFilterCondition(userInfo, condition, pageable);
+        List<SteadyQueryResponse> searchResponses = filterResponse.result()
+                .stream()
+                .map(SteadyQueryResponse::from)
+                .toList();
+
+        Cursor prevCursor = Cursor.cursorFromSteady(filterResponse.prevCursorSteady());
+        Cursor nextCursor = Cursor.cursorFromSteady(filterResponse.nextCursorSteady());
+
+        CursorResponse cursorResponse;
+        if (condition.cursor().isPromotedAtCursor()) {
+            cursorResponse = new CursorResponse<>(prevCursor.getPromotedAt(), nextCursor.getPromotedAt());
+            return PageResponse.of(searchResponses, cursorResponse);
+        }
+
+        cursorResponse = new CursorResponse<>(prevCursor.getDeadline(), nextCursor.getDeadline());
+        return PageResponse.of(searchResponses, cursorResponse);
     }
 
     @Transactional(readOnly = true)
@@ -191,7 +212,9 @@ public class SteadyService {
         steady.finish(user);
     }
 
+
     @Transactional
+    @CacheEvict(cacheNames = "steadies", allEntries = true)
     public void deleteSteady(Long steadyId, UserInfo userInfo) {
         User user = userRepository.getUserBy(userInfo.userId());
         Steady steady = steadyRepository.getSteady(steadyId);

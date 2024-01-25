@@ -8,6 +8,7 @@ import dev.steady.steady.domain.SteadyStatus;
 import dev.steady.steady.dto.request.SteadyCreateRequest;
 import dev.steady.steady.dto.request.SteadySearchRequest;
 import dev.steady.steady.dto.request.SteadyUpdateRequest;
+import dev.steady.steady.dto.response.CursorResponse;
 import dev.steady.steady.dto.response.MySteadyResponse;
 import dev.steady.steady.dto.response.PageResponse;
 import dev.steady.steady.dto.response.ParticipantResponse;
@@ -16,6 +17,7 @@ import dev.steady.steady.dto.response.SteadyQueryResponse;
 import dev.steady.steady.dto.response.SteadyQuestionResponse;
 import dev.steady.steady.dto.response.SteadyQuestionsResponse;
 import dev.steady.steady.dto.response.SteadyRankResponse;
+import dev.steady.steady.uitl.Cursor;
 import dev.steady.user.domain.Position;
 import dev.steady.user.domain.Stack;
 import dev.steady.user.domain.User;
@@ -145,7 +147,6 @@ public class SteadyFixturesV2 {
                 null,
                 null,
                 null,
-                null,
                 "false",
                 null);
     }
@@ -160,14 +161,26 @@ public class SteadyFixturesV2 {
                 null,
                 null,
                 null,
-                null,
                 "false",
                 "말도 안 되는 검색조건입니다. 아무것도 이 조건에 걸리지 않습니다.");
     }
 
-    public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
+    public static SteadySearchRequest createCacheableRequest() {
         return new SteadySearchRequest(
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                "recruiting",
+                "false",
+                null);
+    }
+
+    public static SteadySearchRequest createOrderByDeadLineSteadySearchRequest() {
+        return new SteadySearchRequest(
                 "asc",
                 "deadline",
                 null,
@@ -181,8 +194,9 @@ public class SteadyFixturesV2 {
     }
 
     public static PageResponse<SteadyQueryResponse> createSteadyPageResponse(Steady steady, Pageable pageable) {
-        Page<Steady> steadies = new PageImpl<>(List.of(steady), pageable, 1);
-        return PageResponse.from(steadies.map(SteadyQueryResponse::from));
+        SteadyQueryResponse queryResponse = SteadyQueryResponse.from(steady);
+        Cursor cursor = Cursor.cursorFromSteady(steady);
+        return PageResponse.of(List.of(queryResponse), new CursorResponse(cursor.getPromotedAt(), cursor.getDeadline()));
     }
 
     public static SteadyQuestionsResponse createSteadyQuestionsResponse() {
