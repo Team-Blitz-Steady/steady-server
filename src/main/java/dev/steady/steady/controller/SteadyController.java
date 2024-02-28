@@ -114,7 +114,14 @@ public class SteadyController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{steadyId}/{memberId}")
+    @DeleteMapping("{steadyId}/withdraw")
+    public ResponseEntity<Void> withdrawSteady(@PathVariable Long steadyId,
+                               @Auth UserInfo userInfo) {
+        steadyService.withDrawSteady(steadyId, userInfo);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{steadyId}/members/{memberId}")
     public ResponseEntity<Void> expelParticipant(@PathVariable Long steadyId,
                                                  @PathVariable Long memberId,
                                                  @Auth UserInfo userInfo) {
