@@ -173,7 +173,7 @@ public class Steady extends BaseEntity {
     public void addParticipantByLeader(User leader, User member) {
         validateLeader(leader);
         participants.add(Participant.createMember(member, this));
-        numberOfParticipants = participants.getNumberOfParticipants();
+        updateNumberOfParticipants();
     }
 
     public void expelParticipantByLeader(User leader, Participant participant) {
@@ -181,7 +181,11 @@ public class Steady extends BaseEntity {
         if (finishedAt != null || isFinished()) {
             throw new InvalidStateException(ALREADY_FINISHED);
         }
-        participant.delete();
+        participants.getAllParticipants().remove(participant);
+        updateNumberOfParticipants();
+    }
+
+    public void updateNumberOfParticipants(){
         numberOfParticipants = participants.getNumberOfParticipants();
     }
 
