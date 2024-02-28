@@ -51,16 +51,11 @@ public class Participants {
     }
 
     public List<Participant> getAllParticipants() {
-        return steadyParticipants.stream()
-                .filter(participant -> !participant.isDeleted())
-                .toList();
+        return steadyParticipants;
     }
 
     public int getNumberOfParticipants() {
-        long count = steadyParticipants.stream()
-                .filter(participant -> !participant.isDeleted())
-                .count();
-        return (int) count;
+        return steadyParticipants.size();
     }
 
     public int getParticipantLimit() {
