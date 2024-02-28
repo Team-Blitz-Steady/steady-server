@@ -194,7 +194,7 @@ public class SteadyService {
         User user = userRepository.getUserBy(userInfo.userId());
         Steady steady = steadyRepository.getSteady(steadyId);
         Participant participant = participantRepository.findByUserAndSteady(user, steady);
-        participant.delete();
+        participant.withdraw();
     }
 
     @Transactional
