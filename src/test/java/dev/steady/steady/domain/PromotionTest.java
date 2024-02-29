@@ -13,9 +13,10 @@ class PromotionTest {
     void promotionUseTest() {
         // given
         Promotion promotion = new Promotion();
-        promotion.use();
-        promotion.use();
-        promotion.use();
+        int limit = 3;
+        while (limit-- > 0) {
+            promotion.use();
+        }
 
         // when & then
         assertThatThrownBy(() -> promotion.use())

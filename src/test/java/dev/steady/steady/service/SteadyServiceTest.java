@@ -465,6 +465,27 @@ class SteadyServiceTest {
     }
 
     @Test
+    @DisplayName("스테디 참여자가 스테디를 탈퇴할 수 있다.")
+    void withdrawSteadyTest() {
+        // given
+        var member = userRepository.save(generateUser(position));
+        var leaderInfo = createUserInfo(leader.getId());
+        var memberInfo = createUserInfo(member.getId());
+
+        var steadyRequest = generateSteadyCreateRequest(stack.getId(), position.getId());
+        var steadyId = steadyService.create(steadyRequest, leaderInfo);
+        var steady = steadyRepository.getSteady(steadyId);
+        steady.addParticipantByLeader(leader, member);
+
+        // when
+        steadyService.withDrawSteady(steady.getId(), memberInfo);
+
+        // then
+        Steady foundSteady = steadyRepository.getSteady(steadyId);
+        assertThat(foundSteady.getNumberOfParticipants()).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("스테디 리더가 참여자를 추방할 수 있다.")
     void expelParticipantTest() {
         // given

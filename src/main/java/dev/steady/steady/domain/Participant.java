@@ -11,11 +11,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Participant extends BaseEntity {
 
@@ -34,14 +36,10 @@ public class Participant extends BaseEntity {
     @Column(name = "is_leader", nullable = false)
     private boolean isLeader;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted;
-
     private Participant(User user, Steady steady, boolean isLeader) {
         this.user = user;
         this.steady = steady;
         this.isLeader = isLeader;
-        this.isDeleted = false;
     }
 
     public static Participant createLeader(User user, Steady steady) {
@@ -52,12 +50,14 @@ public class Participant extends BaseEntity {
         return new Participant(user, steady, false);
     }
 
+    public void withdraw() {
+        steady.getParticipants().getAllParticipants().remove(this);
+        steady.updateNumberOfParticipants();
+    }
+
+
     public Long getUserId() {
         return this.user.getId();
     }
 
-    public void delete() {
-        this.isDeleted = true;
-    }
-    
 }

@@ -190,6 +190,14 @@ public class SteadyService {
     }
 
     @Transactional
+    public void withDrawSteady(Long steadyId, UserInfo userInfo) {
+        User user = userRepository.getUserBy(userInfo.userId());
+        Steady steady = steadyRepository.getSteady(steadyId);
+        Participant participant = participantRepository.findByUserAndSteady(user, steady);
+        participant.withdraw();
+    }
+
+    @Transactional
     public void expelParticipant(Long steadyId, Long memberId, UserInfo userInfo) {
         Steady steady = steadyRepository.getSteady(steadyId);
         User leader = userRepository.getUserBy(userInfo.userId());

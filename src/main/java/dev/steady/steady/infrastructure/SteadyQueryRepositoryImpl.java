@@ -76,7 +76,7 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
 
-        Steady prevCursor = prev.isEmpty() ? null : prev.get(prev.size() - 1);
+        Steady prevCursor = prev.size() < pageable.getPageSize() + 1 ? null : prev.get(prev.size() - 1);
         return new SteadyFilterResponse(steadies, prevCursor);
     }
 
@@ -94,8 +94,7 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
                 .where(
                         isFinishedSteady(status),
                         isWorkSteady(status),
-                        isParticipantUserIdEqual(user),
-                        isParticipantNotDeleted()
+                        isParticipantUserIdEqual(user)
                 )
                 .orderBy(orderBySort(pageable.getSort(), Participant.class), steady.id.asc())
                 .offset(pageable.getOffset())
@@ -122,10 +121,6 @@ public class SteadyQueryRepositoryImpl implements SteadyQueryRepository {
 
     private BooleanExpression isParticipantUserIdEqual(User user) {
         return participant.user.id.eq(user.getId());
-    }
-
-    private BooleanExpression isParticipantNotDeleted() {
-        return participant.isDeleted.isFalse();
     }
 
     private BooleanExpression isFinishedSteady(SteadyStatus status) {
