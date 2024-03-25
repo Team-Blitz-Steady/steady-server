@@ -14,8 +14,8 @@
 
 |                                            BE                                            |                                           BE                                            |                                           BE                                           |
 |:----------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------:|
-| <img src="https://avatars.githubusercontent.com/u/101342145?v=4" width=400px alt="이정욱"/> | <img src="https://avatars.githubusercontent.com/u/102007066?v=4" width=400px alt="이지윤"> | <img src="https://avatars.githubusercontent.com/u/98159941?v=4" width=400px alt="홍창기"> |
-|                            [고범준](https://github.com/JeongWuk)                            |                            [나영경](https://github.com/JIY00N2)                            |                          [원건희](https://github.com/sscoderati)                          |
+| <img src="https://avatars.githubusercontent.com/u/101342145?v=4" width=400px alt="고범준"/> | <img src="https://avatars.githubusercontent.com/u/102007066?v=4" width=400px alt="나영경"> | <img src="https://avatars.githubusercontent.com/u/98159941?v=4" width=400px alt="원건희"> |
+|                            [고범준](https://github.com/K-jun98)                            |                            [나영경](https://github.com/na-yk)                            |                          [원건희](https://github.com/weonest)                          |
 |                                       Tech Leader                                        |                                           PO                                            |                                      Team Leader                                       |
 
 
